@@ -11,7 +11,7 @@
                     "type": "Value",
                     "id": "91224230-cfc1-4d0c-a996-d583acc7d978",
                     "expectedControlType": "Vector2",
-                    "processors": "ScaleVector2",
+                    "processors": "NormalizeVector2",
                     "interactions": "",
                     "initialStateCheck": true
                 },
@@ -21,7 +21,7 @@
                     "id": "e89d201a-b718-4c84-8c85-173ae4a21c7a",
                     "expectedControlType": "",
                     "processors": "",
-                    "interactions": "Hold",
+                    "interactions": "Hold(duration=0.5)",
                     "initialStateCheck": false
                 },
                 {
@@ -34,9 +34,9 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "New action",
+                    "name": "Sprint",
                     "type": "Button",
-                    "id": "3f3c1534-83b9-4c55-9313-4fedec2e2b32",
+                    "id": "601b0365-6e28-4847-9e98-8eb60b37be88",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -189,12 +189,12 @@
                 },
                 {
                     "name": "",
-                    "id": "2e33f9dc-35af-4320-a50f-9c29c8c918ab",
-                    "path": "",
+                    "id": "1ccb6509-f499-4b54-a836-570a50e429cb",
+                    "path": "<Keyboard>/leftShift",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "New action",
+                    "action": "Sprint",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

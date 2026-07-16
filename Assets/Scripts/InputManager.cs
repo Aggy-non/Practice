@@ -1,53 +1,92 @@
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.AdaptivePerformance;
 using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
     private bool chargeStarted=false;
-    private Vector3 movementVector;
+    Vector3 movementVector;
+
+    PlayerInputs playerInputs;
     private void Awake()
     {
-
+        playerInputs = new PlayerInputs();
+        InputLinking();
     }
     private void Update()
     {
-      
+        // just log it for now we'll make it send event args later
+        Debug.Log(ReturnMovementVector());
     }
-    public void JumpInput(InputAction.CallbackContext context)
+    private void JumpInput(InputAction.CallbackContext context)
     {
-        if (context.performed)
-        {
-            //charge state
-            Debug.Log("Jump is charging");
-            chargeStarted = true;
-        }
 
-        else if (context.canceled && !chargeStarted)
+        if (chargeStarted)
         {
-            //normal jump
-            Debug.Log("Normal Jump ");
-        }
-
-        else if (context.canceled && chargeStarted)
-        {
-            //Charge jump
+            //Release charge jump
             //To change charge jump threshold go to input system map to change it
             Debug.Log("Charge jump is performed ");
             chargeStarted = false;
         }
+
+        else 
+        {
+            //normal jump
+            Debug.Log("Normal Jump " + context.phase);
+        }
         
     }
 
-    
-    public void MovementInput(InputAction.CallbackContext context)
+    private void StartJumpCharge(InputAction.CallbackContext context)
     {
-        Vector2 inputVector = context.ReadValue<Vector2>();
-        movementVector = new Vector3(inputVector.x, 0, inputVector.y);
+        //start charging the charge jump
+        chargeStarted = true;
+        Debug.Log("Charging");
     }
 
-    public Vector3 ReturnMovementVector()
-    {
+    private Vector3 ReturnMovementVector()
+    {         
+        //return the direction in which player should move
+        Vector2 inputVector = playerInputs.CharacterControls.Movement.ReadValue<Vector2>();
+        movementVector = new(inputVector.x, 0, inputVector.y);
         return movementVector;
+    }
+
+    private void CrouchOrRollInput(InputAction.CallbackContext context)
+    {
+        //Crouch and dodge roll logic
+        if (movementVector == Vector3.zero)
+        {
+            //perform crouch
+            Debug.Log("Crouch Pressed");
+
+        }
+        else
+        {
+            //perform dodge roll in the direction of the movement vector
+            Debug.Log("Dodge roll is performed");
+        }
+    }
+
+    private void SprintInput(InputAction.CallbackContext context)
+    {
+        //Sprint toggle
+        Debug.Log("Sprint Pressed");
+    }
+
+    private void InputLinking()
+    {
+        //link each input event to its method
+        playerInputs.CharacterControls.Enable();
+        playerInputs.CharacterControls.Jump.canceled += JumpInput;
+        playerInputs.CharacterControls.Jump.performed += StartJumpCharge;
+        playerInputs.CharacterControls.Crouch.performed += CrouchOrRollInput;        
+        playerInputs.CharacterControls.Sprint.performed += SprintInput;
+    }
+    private void OnDestroy()
+    {
+        // this line prevents memory leak
+        playerInputs.CharacterControls.Disable();
     }
 }

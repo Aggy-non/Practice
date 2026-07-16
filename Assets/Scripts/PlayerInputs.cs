@@ -72,7 +72,7 @@ using UnityEngine.InputSystem.Utilities;
 /// }
 /// </code>
 /// </example>
-public partial class @playerInputs: IInputActionCollection2, IDisposable
+public partial class @PlayerInputs: IInputActionCollection2, IDisposable
 {
     /// <summary>
     /// Provides access to the underlying asset instance.
@@ -82,7 +82,7 @@ public partial class @playerInputs: IInputActionCollection2, IDisposable
     /// <summary>
     /// Constructs a new instance.
     /// </summary>
-    public @playerInputs()
+    public @PlayerInputs()
     {
         asset = InputActionAsset.FromJson(@"{
     ""version"": 1,
@@ -97,7 +97,7 @@ public partial class @playerInputs: IInputActionCollection2, IDisposable
                     ""type"": ""Value"",
                     ""id"": ""91224230-cfc1-4d0c-a996-d583acc7d978"",
                     ""expectedControlType"": ""Vector2"",
-                    ""processors"": ""ScaleVector2"",
+                    ""processors"": ""NormalizeVector2"",
                     ""interactions"": """",
                     ""initialStateCheck"": true
                 },
@@ -107,7 +107,7 @@ public partial class @playerInputs: IInputActionCollection2, IDisposable
                     ""id"": ""e89d201a-b718-4c84-8c85-173ae4a21c7a"",
                     ""expectedControlType"": """",
                     ""processors"": """",
-                    ""interactions"": ""Hold"",
+                    ""interactions"": ""Hold(duration=0.5)"",
                     ""initialStateCheck"": false
                 },
                 {
@@ -120,9 +120,9 @@ public partial class @playerInputs: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""New action"",
+                    ""name"": ""Sprint"",
                     ""type"": ""Button"",
-                    ""id"": ""3f3c1534-83b9-4c55-9313-4fedec2e2b32"",
+                    ""id"": ""601b0365-6e28-4847-9e98-8eb60b37be88"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -275,12 +275,12 @@ public partial class @playerInputs: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""2e33f9dc-35af-4320-a50f-9c29c8c918ab"",
-                    ""path"": """",
+                    ""id"": ""1ccb6509-f499-4b54-a836-570a50e429cb"",
+                    ""path"": ""<Keyboard>/leftShift"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""New action"",
+                    ""action"": ""Sprint"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -311,12 +311,12 @@ public partial class @playerInputs: IInputActionCollection2, IDisposable
         m_CharacterControls_Movement = m_CharacterControls.FindAction("Movement", throwIfNotFound: true);
         m_CharacterControls_Jump = m_CharacterControls.FindAction("Jump", throwIfNotFound: true);
         m_CharacterControls_Crouch = m_CharacterControls.FindAction("Crouch", throwIfNotFound: true);
-        m_CharacterControls_Newaction = m_CharacterControls.FindAction("New action", throwIfNotFound: true);
+        m_CharacterControls_Sprint = m_CharacterControls.FindAction("Sprint", throwIfNotFound: true);
     }
 
-    ~@playerInputs()
+    ~@PlayerInputs()
     {
-        UnityEngine.Debug.Assert(!m_CharacterControls.enabled, "This will cause a leak and performance issues, playerInputs.CharacterControls.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_CharacterControls.enabled, "This will cause a leak and performance issues, PlayerInputs.CharacterControls.Disable() has not been called.");
     }
 
     /// <summary>
@@ -395,18 +395,18 @@ public partial class @playerInputs: IInputActionCollection2, IDisposable
     private readonly InputAction m_CharacterControls_Movement;
     private readonly InputAction m_CharacterControls_Jump;
     private readonly InputAction m_CharacterControls_Crouch;
-    private readonly InputAction m_CharacterControls_Newaction;
+    private readonly InputAction m_CharacterControls_Sprint;
     /// <summary>
     /// Provides access to input actions defined in input action map "Character Controls".
     /// </summary>
     public struct CharacterControlsActions
     {
-        private @playerInputs m_Wrapper;
+        private @PlayerInputs m_Wrapper;
 
         /// <summary>
         /// Construct a new instance of the input action map wrapper class.
         /// </summary>
-        public CharacterControlsActions(@playerInputs wrapper) { m_Wrapper = wrapper; }
+        public CharacterControlsActions(@PlayerInputs wrapper) { m_Wrapper = wrapper; }
         /// <summary>
         /// Provides access to the underlying input action "CharacterControls/Movement".
         /// </summary>
@@ -420,9 +420,9 @@ public partial class @playerInputs: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Crouch => m_Wrapper.m_CharacterControls_Crouch;
         /// <summary>
-        /// Provides access to the underlying input action "CharacterControls/Newaction".
+        /// Provides access to the underlying input action "CharacterControls/Sprint".
         /// </summary>
-        public InputAction @Newaction => m_Wrapper.m_CharacterControls_Newaction;
+        public InputAction @Sprint => m_Wrapper.m_CharacterControls_Sprint;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -458,9 +458,9 @@ public partial class @playerInputs: IInputActionCollection2, IDisposable
             @Crouch.started += instance.OnCrouch;
             @Crouch.performed += instance.OnCrouch;
             @Crouch.canceled += instance.OnCrouch;
-            @Newaction.started += instance.OnNewaction;
-            @Newaction.performed += instance.OnNewaction;
-            @Newaction.canceled += instance.OnNewaction;
+            @Sprint.started += instance.OnSprint;
+            @Sprint.performed += instance.OnSprint;
+            @Sprint.canceled += instance.OnSprint;
         }
 
         /// <summary>
@@ -481,9 +481,9 @@ public partial class @playerInputs: IInputActionCollection2, IDisposable
             @Crouch.started -= instance.OnCrouch;
             @Crouch.performed -= instance.OnCrouch;
             @Crouch.canceled -= instance.OnCrouch;
-            @Newaction.started -= instance.OnNewaction;
-            @Newaction.performed -= instance.OnNewaction;
-            @Newaction.canceled -= instance.OnNewaction;
+            @Sprint.started -= instance.OnSprint;
+            @Sprint.performed -= instance.OnSprint;
+            @Sprint.canceled -= instance.OnSprint;
         }
 
         /// <summary>
@@ -559,11 +559,11 @@ public partial class @playerInputs: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnCrouch(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "New action" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "Sprint" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnNewaction(InputAction.CallbackContext context);
+        void OnSprint(InputAction.CallbackContext context);
     }
 }
