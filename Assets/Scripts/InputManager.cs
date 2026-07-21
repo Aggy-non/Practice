@@ -6,9 +6,12 @@ using UnityEngine.InputSystem;
 public class InputManager : MonoBehaviour
 {
     private bool chargeStarted=false;
-    Vector3 movementVector;
+    private Vector3 movementVector;
 
-    PlayerInputs playerInputs;
+    private PlayerInputs playerInputs;
+
+
+
     private void Awake()
     {
         playerInputs = new PlayerInputs();
@@ -17,7 +20,7 @@ public class InputManager : MonoBehaviour
     private void Update()
     {
         // just log it for now we'll make it send event args later
-        Debug.Log(ReturnMovementVector());
+        //Debug.Log(ReturnMovementVector());
     }
     private void JumpInput(InputAction.CallbackContext context)
     {
