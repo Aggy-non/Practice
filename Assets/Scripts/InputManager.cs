@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using System;
 using UnityEngine;
 using UnityEngine.AdaptivePerformance;
 using UnityEngine.InputSystem;
@@ -7,10 +8,9 @@ public class InputManager : MonoBehaviour
 {
     private bool chargeStarted=false;
     private Vector3 movementVector;
-
     private PlayerInputs playerInputs;
 
-
+    public event Action<Vector3> GetMovementVector;
 
     private void Awake()
     {
@@ -20,7 +20,7 @@ public class InputManager : MonoBehaviour
     private void Update()
     {
         // just log it for now we'll make it send event args later
-        //Debug.Log(ReturnMovementVector());
+        ReturnMovementVector();
     }
     private void JumpInput(InputAction.CallbackContext context)
     {
@@ -48,12 +48,12 @@ public class InputManager : MonoBehaviour
         Debug.Log("Charging");
     }
 
-    private Vector3 ReturnMovementVector()
+    private void ReturnMovementVector()
     {         
         //return the direction in which player should move
         Vector2 inputVector = playerInputs.CharacterControls.Movement.ReadValue<Vector2>();
         movementVector = new(inputVector.x, 0, inputVector.y);
-        return movementVector;
+        GetMovementVector?.Invoke(movementVector);
     }
 
     private void CrouchOrRollInput(InputAction.CallbackContext context)

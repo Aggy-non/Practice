@@ -1,16 +1,34 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CharacterControl : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [SerializeField] private InputManager inputManager;
+    [SerializeField] private Rigidbody rb;
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float dragSpeed;
+
+    private bool isGrounded=true;
+
+    private void Awake()
     {
-        
+        inputManager.GetMovementVector += MoveCharacter;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void MoveCharacter(Vector3 InputVector)
     {
-        
+        rb.AddForce(InputVector * moveSpeed, ForceMode.VelocityChange);
+    }
+
+    private void Update()
+    {
+        if (isGrounded)
+        {
+            rb.linearDamping = dragSpeed;
+        }
+        else
+        {
+            rb.linearDamping = 0;
+        }
     }
 }
