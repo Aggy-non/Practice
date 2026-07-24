@@ -11,6 +11,7 @@ public class InputManager : MonoBehaviour
     private PlayerInputs playerInputs;
 
     public event Action<Vector3> GetMovementVector;
+    public event Action NormalJump;
 
     private void Awake()
     {
@@ -37,6 +38,7 @@ public class InputManager : MonoBehaviour
         {
             //normal jump
             Debug.Log("Normal Jump " + context.phase);
+            NormalJump?.Invoke();
         }
         
     }
