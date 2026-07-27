@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -18,13 +19,19 @@ public class CharacterControl : MonoBehaviour
     [SerializeField] private float maxSpeed;
     [SerializeField] private float moveSpeed;
 
-    [Header("Physics settings")]
+    [Header("Physics settings")]    
+    [Range(0f, 1f)]
     [SerializeField] private float landDrag;
+    [Range (0f, 1f)]
     [SerializeField] private float airDrag;
+    private float currentDrag;
+    [SerializeField] private float gravityScale; 
 
 
     [Header("Jump settings")]
     [SerializeField] private float jumpForce;
+    [SerializeField] private float bufferTime;
+    private float bufferTimeCounter;
     private bool revertGroundCheck;
 
     private void Awake()
@@ -36,36 +43,39 @@ public class CharacterControl : MonoBehaviour
     
     private void Start()
     {
-        
-    }
-           
-    private void Update()
-    {
-        DragControl();
-        GroundCheck();
         rb.maxLinearVelocity = maxSpeed;
-        
     }
 
+    private void Update()
+    {        
+        GroundCheck();
+    }
+
+    private void FixedUpdate()
+    {
+        CustomGravity();
+        DragControl();
+    }
     private void MoveCharacter(Vector3 InputVector)
     {
-        rb.AddForce(InputVector * moveSpeed, ForceMode.VelocityChange);
+        rb.AddForce(InputVector * moveSpeed , ForceMode.VelocityChange);
     }
 
     private void DragControl()
     {
-        //speed limiter
-        
+        float currentDrag;
         if (isGrounded)
         {
-            //Ground Drag
-            //rb.linearDamping = landDrag;
+            currentDrag = landDrag;
         }
         else
         {
-            //Air Drag
-            //rb.linearDamping = airDrag;
+            currentDrag = airDrag;    
         }
+        Vector3 vel = rb.linearVelocity;
+        vel.x *= currentDrag;
+        vel.z *= currentDrag;
+        rb.linearVelocity = vel;
     }
 
     private void GroundCheck()
@@ -92,17 +102,51 @@ public class CharacterControl : MonoBehaviour
 
     private void PerformNormalJump()
     {
-        //revertGroundCheck = false;
-        if (!isGrounded) return;
-        rb.linearVelocity = new(rb.linearVelocity.x, 0, rb.linearVelocity.z); 
-        rb.AddForce(0,jumpForce,0,ForceMode.Impulse);
         
+        //revertGroundCheck = false;
+        if (isGrounded)
+        {
+            NormalJump();
+        }
+        else
+        {
+            bufferTimeCounter = bufferTime;
+            StartCoroutine(BufferJump());
+        }
     }
 
+    private void NormalJump()
+    {
+        rb.linearVelocity = new(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+        rb.AddForce(0, jumpForce, 0, ForceMode.Impulse);
+    }
+
+    private IEnumerator BufferJump()
+    {    
+       while(bufferTimeCounter>0)
+        {
+            if (isGrounded)
+            {
+                NormalJump();
+                yield break;
+            }
+
+            bufferTimeCounter-= Time.deltaTime;
+            yield return null;
+            
+        }
+    }
+
+    private void CustomGravity()
+    {
+        rb.AddForce(Physics.gravity * gravityScale, ForceMode.Acceleration);     
+    }
     private void GetAllComponents()
     {
         charCollider = GetComponent<CapsuleCollider>();
         rb = GetComponent<Rigidbody>();
         inputManager = GetComponent<InputManager>();
     }
+
+    
 }
