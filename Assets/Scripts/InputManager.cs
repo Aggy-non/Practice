@@ -37,7 +37,7 @@ public class InputManager : MonoBehaviour
         else 
         {
             //normal jump
-            Debug.Log("Normal Jump " + context.phase);
+            //Debug.Log("Normal Jump " + context.phase);
             NormalJump?.Invoke();
         }
         
@@ -55,30 +55,16 @@ public class InputManager : MonoBehaviour
         //return the direction in which player should move
         Vector2 inputVector = playerInputs.CharacterControls.Movement.ReadValue<Vector2>();
         movementVector = new(inputVector.x, 0, inputVector.y);
+        
         GetMovementVector?.Invoke(movementVector);
     }
 
     private void CrouchOrRollInput(InputAction.CallbackContext context)
     {
-        //Crouch and dodge roll logic
-        if (movementVector == Vector3.zero)
-        {
-            //perform crouch
-            Debug.Log("Crouch Pressed");
-
-        }
-        else
-        {
-            //perform dodge roll in the direction of the movement vector
-            Debug.Log("Dodge roll is performed");
-        }
+        //crouch logic
     }
 
-    private void SprintInput(InputAction.CallbackContext context)
-    {
-        //Sprint toggle
-        Debug.Log("Sprint Pressed");
-    }
+   
 
     private void InputLinking()
     {
@@ -86,8 +72,7 @@ public class InputManager : MonoBehaviour
         playerInputs.CharacterControls.Enable();
         playerInputs.CharacterControls.Jump.canceled += JumpInput;
         playerInputs.CharacterControls.Jump.performed += StartJumpCharge;
-        playerInputs.CharacterControls.Crouch.performed += CrouchOrRollInput;        
-        playerInputs.CharacterControls.Sprint.performed += SprintInput;
+        playerInputs.CharacterControls.Crouch.performed += CrouchOrRollInput;         
     }
     private void OnDestroy()
     {

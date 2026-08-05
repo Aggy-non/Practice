@@ -3,7 +3,8 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 public class CharacterControl : MonoBehaviour
-{          
+{
+    #region fields
     [Header("Components")]
     private InputManager inputManager;
     private CapsuleCollider charCollider;
@@ -18,47 +19,74 @@ public class CharacterControl : MonoBehaviour
     [Header("Movement settings")]
     [SerializeField] private float maxSpeed;
     [SerializeField] private float moveSpeed;
+    public Vector3 InputDir { get; private set; }
+    private Vector3 MoveDir;
+
 
     [Header("Physics settings")]    
     [Range(0f, 1f)]
     [SerializeField] private float landDrag;
     [Range (0f, 1f)]
-    [SerializeField] private float airDrag;
-    private float currentDrag;
-    [SerializeField] private float gravityScale; 
-
+    [SerializeField] private float airDrag;    
+    private float gravityScale=1f;
+    [SerializeField] private float landGravityScale; 
+    [SerializeField] private float airGravityScale;
 
     [Header("Jump settings")]
     [SerializeField] private float jumpForce;
     [SerializeField] private float bufferTime;
     private float bufferTimeCounter;
-    private bool revertGroundCheck;
 
+    [Header("Camera Settings")]
+    [SerializeField]private Transform cameraPosition;
+    private Vector3 viewDir;
+    private Transform orientation;
+    
+
+    #endregion
     private void Awake()
     {
-        GetAllComponents();  
-        inputManager.GetMovementVector += MoveCharacter;
+        GetAllComponents();
+        inputManager.GetMovementVector += value => InputDir = value;
         inputManager.NormalJump += PerformNormalJump;
     }
     
     private void Start()
     {
+        CursorLock();
         rb.maxLinearVelocity = maxSpeed;
     }
 
     private void Update()
     {        
         GroundCheck();
+        CalculateMoveDir();
     }
 
     private void FixedUpdate()
     {
+        //make a seperate class for these 2
         CustomGravity();
         DragControl();
+        MoveCharacter();
     }
-    private void MoveCharacter(Vector3 InputVector)
+
+    private void CalculateMoveDir()
     {
-        rb.AddForce(InputVector * moveSpeed , ForceMode.VelocityChange);
+        Vector3 camForward = cameraPosition.forward;
+        camForward.y = 0;
+        camForward.Normalize();
+
+        Vector3 camRight = cameraPosition.right;
+        camRight.y = 0;
+        camRight.Normalize();
+
+        MoveDir = camForward * InputDir.z + camRight * InputDir.x;
+
+    }
+    private void MoveCharacter()
+    {
+        rb.AddForce(MoveDir * moveSpeed , ForceMode.VelocityChange);
     }
 
     private void DragControl()
@@ -67,11 +95,16 @@ public class CharacterControl : MonoBehaviour
         if (isGrounded)
         {
             currentDrag = landDrag;
+            gravityScale = landGravityScale;
         }
         else
         {
             currentDrag = airDrag;    
+            gravityScale = airGravityScale;
         }
+
+        //seperate setting drag and applying drag 
+
         Vector3 vel = rb.linearVelocity;
         vel.x *= currentDrag;
         vel.z *= currentDrag;
@@ -81,7 +114,7 @@ public class CharacterControl : MonoBehaviour
     private void GroundCheck()
     {                
         Vector3 origin = transform.TransformPoint(charCollider.center);
-        isGrounded = Physics.SphereCast(origin, feetRadius, Vector3.down, out RaycastHit hitInfo, groundCheckDistance, groundLayer);// && revertGroundCheck;                
+        isGrounded = Physics.SphereCast(origin, feetRadius, Vector3.down, out RaycastHit hitInfo, groundCheckDistance, groundLayer);               
     }
 
 
@@ -102,16 +135,16 @@ public class CharacterControl : MonoBehaviour
 
     private void PerformNormalJump()
     {
-        
-        //revertGroundCheck = false;
+       
         if (isGrounded)
         {
             NormalJump();
         }
         else
         {
-            bufferTimeCounter = bufferTime;
-            StartCoroutine(BufferJump());
+            StopCoroutine(nameof(BufferJump));
+            bufferTimeCounter = bufferTime;            
+            StartCoroutine(nameof(BufferJump));
         }
     }
 
@@ -123,6 +156,8 @@ public class CharacterControl : MonoBehaviour
 
     private IEnumerator BufferJump()
     {    
+
+        //make a seperate timer utility class
        while(bufferTimeCounter>0)
         {
             if (isGrounded)
@@ -146,6 +181,12 @@ public class CharacterControl : MonoBehaviour
         charCollider = GetComponent<CapsuleCollider>();
         rb = GetComponent<Rigidbody>();
         inputManager = GetComponent<InputManager>();
+    }
+
+    private void CursorLock()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     
