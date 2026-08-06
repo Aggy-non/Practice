@@ -19,9 +19,8 @@ public class CharacterControl : MonoBehaviour
     [Header("Movement settings")]
     [SerializeField] private float maxSpeed;
     [SerializeField] private float moveSpeed;
-    public Vector3 InputDir { get; private set; }
+    public Vector3 InputDir;
     private Vector3 MoveDir;
-
 
     [Header("Physics settings")]    
     [Range(0f, 1f)]
@@ -33,7 +32,7 @@ public class CharacterControl : MonoBehaviour
     [SerializeField] private float airGravityScale;
 
     [Header("Jump settings")]
-    [SerializeField] private float jumpForce;
+    [SerializeField] private float normalJumpForce;
     [SerializeField] private float bufferTime;
     private float bufferTimeCounter;
 
@@ -41,6 +40,9 @@ public class CharacterControl : MonoBehaviour
     [SerializeField]private Transform cameraPosition;
     private Vector3 viewDir;
     private Transform orientation;
+
+    [Header("Charge Jump")]
+    private ChargeJumpHandler chargeJumpHandler;
     
 
     #endregion
@@ -49,18 +51,20 @@ public class CharacterControl : MonoBehaviour
         GetAllComponents();
         inputManager.GetMovementVector += value => InputDir = value;
         inputManager.NormalJump += PerformNormalJump;
+        chargeJumpHandler.ChargeJumpPower += ChargeJump;
     }
     
     private void Start()
     {
         CursorLock();
-        rb.maxLinearVelocity = maxSpeed;
+        //rb.maxLinearVelocity = maxSpeed;
     }
 
     private void Update()
     {        
         GroundCheck();
         CalculateMoveDir();
+        
     }
 
     private void FixedUpdate()
@@ -138,7 +142,7 @@ public class CharacterControl : MonoBehaviour
        
         if (isGrounded)
         {
-            NormalJump();
+            CharacterJump(normalJumpForce);
         }
         else
         {
@@ -148,7 +152,13 @@ public class CharacterControl : MonoBehaviour
         }
     }
 
-    private void NormalJump()
+    private void ChargeJump(float chargeJumpPower)
+    {
+        CharacterJump(chargeJumpPower + normalJumpForce);
+        Debug.Log("final jump power"+chargeJumpPower);
+    }
+
+    private void CharacterJump(float jumpForce)
     {
         rb.linearVelocity = new(rb.linearVelocity.x, 0, rb.linearVelocity.z);
         rb.AddForce(0, jumpForce, 0, ForceMode.Impulse);
@@ -162,7 +172,7 @@ public class CharacterControl : MonoBehaviour
         {
             if (isGrounded)
             {
-                NormalJump();
+                CharacterJump(normalJumpForce);
                 yield break;
             }
 
@@ -181,6 +191,7 @@ public class CharacterControl : MonoBehaviour
         charCollider = GetComponent<CapsuleCollider>();
         rb = GetComponent<Rigidbody>();
         inputManager = GetComponent<InputManager>();
+        chargeJumpHandler = GetComponent<ChargeJumpHandler>();
     }
 
     private void CursorLock()
