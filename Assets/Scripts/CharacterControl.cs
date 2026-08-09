@@ -77,16 +77,10 @@ public class CharacterControl : MonoBehaviour
 
     private void CalculateMoveDir()
     {
-        Vector3 camForward = cameraPosition.forward;
-        camForward.y = 0;
-        camForward.Normalize();
-
-        Vector3 camRight = cameraPosition.right;
-        camRight.y = 0;
-        camRight.Normalize();
+        Vector3 camForward = Vector3.ProjectOnPlane(cameraPosition.forward, Vector3.up).normalized;
+        Vector3 camRight = Vector3.ProjectOnPlane(cameraPosition.right, Vector3.up).normalized;
 
         MoveDir = camForward * InputDir.z + camRight * InputDir.x;
-
     }
     private void MoveCharacter()
     {
