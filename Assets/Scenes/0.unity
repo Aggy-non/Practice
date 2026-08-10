@@ -206,8 +206,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 92689280}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.079578124, y: 0.00000005445483, z: -0.0000000043472, w: 0.9968287}
-  m_LocalPosition: {x: 1.36, y: 4.4301157, z: -10.950917}
+  m_LocalRotation: {x: 0.07957803, y: 0.000000018844437, z: -0.0000000015043742, w: 0.9968287}
+  m_LocalPosition: {x: 1.36, y: 4.8973346, z: -11.041348}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -806,7 +806,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 6.04, y: 6.04, z: 6.04}
+  m_LocalScale: {x: 192.33, y: 192.33, z: 192.33}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
@@ -1103,7 +1103,7 @@ GameObject:
   m_Layer: 0
   m_Name: Camera Target
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 3443629218296621865, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -1116,7 +1116,7 @@ Transform:
   m_GameObject: {fileID: 1914434505}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.6, z: 0}
+  m_LocalPosition: {x: 0, y: 2.63, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1314,7 +1314,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4164801127616615030, guid: f07dbe6cb7f73f24cbd0fc43449d3ab0, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1473,9 +1473,8 @@ GameObject:
   - component: {fileID: 2136653355}
   - component: {fileID: 2136653354}
   - component: {fileID: 2136653353}
-  - component: {fileID: 2136653352}
-  - component: {fileID: 2136653357}
   - component: {fileID: 2136653358}
+  - component: {fileID: 2136653357}
   m_Layer: 0
   m_Name: FreeLook Camera
   m_TagString: Untagged
@@ -1483,30 +1482,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2136653352
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2136653350}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a076c17fe76165e4f8ed21498b877bf9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineFreeLookModifier
-  Easing: 1
-  Modifiers:
-  - rid: 4470161420834046016
-  references:
-    version: 2
-    RefIds:
-    - rid: 4470161420834046016
-      type: {class: CinemachineFreeLookModifier/DistanceModifier, ns: Unity.Cinemachine, asm: Unity.Cinemachine}
-      data:
-        Distance:
-          Top: 5
-          Bottom: 5
 --- !u!114 &2136653353
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1526,7 +1501,7 @@ MonoBehaviour:
       Size: {x: 0.33, y: 0.33518475}
     HardLimits:
       Enabled: 1
-      Size: {x: 0.48, y: 0.72074074}
+      Size: {x: 0.48, y: 0.7318519}
       Offset: {x: 0, y: -0.21}
   CenterOnActivate: 1
   TargetOffset: {x: 0, y: 0, z: 0}
@@ -1559,7 +1534,7 @@ MonoBehaviour:
   Radius: 5
   Orbits:
     Top:
-      Radius: 0.56
+      Radius: 1.85
       Height: 4.54
     Center:
       Radius: 6.41
@@ -1650,8 +1625,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2136653350}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.07957812, y: 0.000000054454826, z: -0.0000000043471995, w: 0.9968287}
-  m_LocalPosition: {x: 1.36, y: 2.88, z: -11.2}
+  m_LocalRotation: {x: 0.07957802, y: 0.000000018798886, z: -9.337565e-10, w: 0.9968287}
+  m_LocalPosition: {x: 1.36, y: 3.91, z: -11.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1721,7 +1696,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44d70cc20219cd84593f67d248eafe36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineCameraOffset
-  Offset: {x: 0, y: 1.57, z: 0}
+  Offset: {x: 0, y: 1, z: 0}
   ApplyAfter: 3
   PreserveComposition: 0
 --- !u!1660057539 &9223372036854775807
