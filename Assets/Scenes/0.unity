@@ -1304,7 +1304,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2460899276332615498, guid: f07dbe6cb7f73f24cbd0fc43449d3ab0, type: 3}
       propertyPath: m_VertexColorAlwaysGammaSpace
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4164801127616615030, guid: f07dbe6cb7f73f24cbd0fc43449d3ab0, type: 3}
       propertyPath: m_Name
@@ -1312,7 +1312,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4164801127616615030, guid: f07dbe6cb7f73f24cbd0fc43449d3ab0, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4780033157618996723, guid: f07dbe6cb7f73f24cbd0fc43449d3ab0, type: 3}
       propertyPath: m_IsActive

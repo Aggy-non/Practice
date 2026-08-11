@@ -12,7 +12,7 @@ public class InputManager : MonoBehaviour
 
     public event Action<Vector3> GetMovementVector;
     public event Action NormalJump;
-    public event Action<float> ChargeStartTime;
+    public event Action<float> ChargeStart;
     public event Action<float> ChargeEndTime;
 
     private void Awake()
@@ -55,7 +55,7 @@ public class InputManager : MonoBehaviour
         //start charging the charge jump
         chargeStarted = true;
         Debug.Log("Charging");
-        ChargeStartTime?.Invoke(chargeStartTime);
+        ChargeStart?.Invoke(chargeStartTime);
     }
 
     private void ReturnMovementVector()

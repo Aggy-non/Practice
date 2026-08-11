@@ -12,7 +12,7 @@ public class ChargeJumpHandler : MonoBehaviour
     private void Awake()
     {
         inputManager = GetComponent<InputManager>();
-        inputManager.ChargeStartTime += value => chargeStartTime = value;
+        inputManager.ChargeStart += value => chargeStartTime = value;
         inputManager.ChargeEndTime += CalculateChargeTime;
     }
 
