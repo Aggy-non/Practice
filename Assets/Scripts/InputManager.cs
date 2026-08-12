@@ -12,8 +12,8 @@ public class InputManager : MonoBehaviour
 
     public event Action<Vector3> GetMovementVector;
     public event Action NormalJump;
-    public event Action<float> ChargeStart;
-    public event Action<float> ChargeEndTime;
+    public event Action ChargeStart;
+    public event Action ChargeEnd;
 
     private void Awake()
     {
@@ -32,8 +32,8 @@ public class InputManager : MonoBehaviour
         {
             //Release charge jump
             //To change charge jump threshold go to input system map to change it
-            float chargeEndTime = Time.time;            
-            ChargeEndTime?.Invoke(chargeEndTime);
+                     
+            ChargeEnd?.Invoke();
             Debug.Log("Charge jump is performed ");
             chargeStarted = false;
         }
@@ -50,12 +50,10 @@ public class InputManager : MonoBehaviour
 
     private void StartJumpCharge(InputAction.CallbackContext context)
     {
-        //make sure this is run first in this function
-        float chargeStartTime=Time.time;
         //start charging the charge jump
         chargeStarted = true;
         Debug.Log("Charging");
-        ChargeStart?.Invoke(chargeStartTime);
+        ChargeStart?.Invoke();
     }
 
     private void ReturnMovementVector()

@@ -19,7 +19,7 @@ public class CharacterControl : MonoBehaviour
     [Header("Movement settings")]
     [SerializeField] private float maxSpeed;
     [SerializeField] private float moveSpeed;
-    public Vector3 InputDir;
+    private Vector3 InputDir;
     private Vector3 MoveDir;
 
     [Header("Physics settings")]    
@@ -42,16 +42,16 @@ public class CharacterControl : MonoBehaviour
     private Transform orientation;
 
     [Header("Charge Jump")]
-    private ChargeJumpHandler chargeJumpHandler;
+    [SerializeField] private int chargeMultiplier;
+    
+    private StopWatch stopWatch;
     
 
     #endregion
     private void Awake()
     {
         GetAllComponents();
-        inputManager.GetMovementVector += value => InputDir = value;
-        inputManager.NormalJump += PerformNormalJump;
-        chargeJumpHandler.ChargeJumpPower += ChargeJump;
+        AssignEvents();
     }
     
     private void Start()
@@ -73,6 +73,7 @@ public class CharacterControl : MonoBehaviour
         CustomGravity();
         DragControl();
         MoveCharacter();
+        RotatePlayer();
     }
 
     private void CalculateMoveDir()
@@ -148,7 +149,7 @@ public class CharacterControl : MonoBehaviour
 
     private void ChargeJump(float chargeJumpPower)
     {
-        CharacterJump(chargeJumpPower + normalJumpForce);
+        CharacterJump((chargeJumpPower*chargeMultiplier) + normalJumpForce);
         Debug.Log("final jump power"+chargeJumpPower);
     }
 
@@ -156,6 +157,14 @@ public class CharacterControl : MonoBehaviour
     {
         rb.linearVelocity = new(rb.linearVelocity.x, 0, rb.linearVelocity.z);
         rb.AddForce(0, jumpForce, 0, ForceMode.Impulse);
+    }
+
+    private void RotatePlayer()
+    {
+        if (InputDir != Vector3.zero)
+        {
+            transform.forward=Vector3.Slerp(transform.forward, InputDir, 10*Time.deltaTime);
+        }
     }
 
     private IEnumerator BufferJump()
@@ -181,11 +190,11 @@ public class CharacterControl : MonoBehaviour
         rb.AddForce(Physics.gravity * gravityScale, ForceMode.Acceleration);     
     }
     private void GetAllComponents()
-    {
+    {        
         charCollider = GetComponent<CapsuleCollider>();
         rb = GetComponent<Rigidbody>();
-        inputManager = GetComponent<InputManager>();
-        chargeJumpHandler = GetComponent<ChargeJumpHandler>();
+        inputManager = GetComponent<InputManager>(); 
+        stopWatch = GetComponent<StopWatch>();
     }
 
     private void CursorLock()
@@ -194,5 +203,11 @@ public class CharacterControl : MonoBehaviour
         Cursor.visible = false;
     }
 
+    private void AssignEvents()
+    {
+        inputManager.GetMovementVector += value => InputDir = value;
+        inputManager.NormalJump += PerformNormalJump;
+        stopWatch.ChargeJumpHoldTime += ChargeJump;
+    }
     
 }

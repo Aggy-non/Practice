@@ -1,31 +1,58 @@
+using System.Drawing;
 using UnityEngine;
 
 public class ChargeJumpVisuals : MonoBehaviour
 {
     private InputManager inputManager;
-    private bool startVisualFlag=false;
-    private Transform origin;
+    private StopWatch stopWatch;
+    private LineRenderer lr;
+    private bool flagStartVisual=false;
+    [SerializeField]private Transform origin;
+    private Vector3 line;
+    private float chargeTime;
+    private Vector3 lineDirection;
     void Start()
     {
+        stopWatch = GetComponent<StopWatch>();
+        lr = GetComponent<LineRenderer>();
         inputManager = GetComponent<InputManager>();
-        inputManager.ChargeStart += VisualsStart;
+
+
+        lr.positionCount = 2;
+        lr.useWorldSpace = true;
+        
+
+
+        stopWatch.StopWatchTime += value => chargeTime = value;
+        inputManager.ChargeStart += LineExtend;
+        inputManager.ChargeEnd += LineErase;
+    }
+
+    private void LineErase()
+    {
+        flagStartVisual = false;
+    }
+
+    private void LineExtend()
+    {
+        flagStartVisual = true;
     }
 
     private void Update()
     {
-        if(startVisualFlag)
+        lr.SetPosition(0, origin.position);
+        lineDirection = Vector3.up;
+        if (flagStartVisual)
         {
-
+            line += lineDirection * chargeTime* Time.deltaTime;
         }
+        else
+        {
+            line=origin.position;
+        }
+        lr.SetPosition(1, line);
+        
     }
 
-    private void VisualsStart(float obj)
-    {
-        startVisualFlag=true;
-    }
-
-    private void ExtendLine()
-    {
-
-    }
+   
 }
