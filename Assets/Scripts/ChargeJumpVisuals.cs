@@ -1,58 +1,85 @@
-using System.Drawing;
 using UnityEngine;
 
 public class ChargeJumpVisuals : MonoBehaviour
 {
+    [Header("Components")]
+    [SerializeField] private Transform aimCamera;
+    
     private InputManager inputManager;
     private StopWatch stopWatch;
     private LineRenderer lr;
-    private bool flagStartVisual=false;
-    [SerializeField]private Transform origin;
+
+
+    private bool lineExtending=false;
+
+
+    [SerializeField] private Transform targetPoint;
+    [SerializeField]private Transform startPoint;
     private Vector3 line;
     private float chargeTime;
     private Vector3 lineDirection;
+
+
+    private Vector3 currentDirection = Vector3.forward;
+    private float currentLength;
+
+
     void Start()
     {
-        stopWatch = GetComponent<StopWatch>();
-        lr = GetComponent<LineRenderer>();
-        inputManager = GetComponent<InputManager>();
-
+        GetComponents();
+        
 
         lr.positionCount = 2;
         lr.useWorldSpace = true;
         
 
-
-        stopWatch.StopWatchTime += value => chargeTime = value;
-        inputManager.ChargeStart += LineExtend;
-        inputManager.ChargeEnd += LineErase;
+        SubscribeEvents();
+        
     }
 
     private void LineErase()
     {
-        flagStartVisual = false;
+        lineExtending = false;
     }
 
     private void LineExtend()
     {
-        flagStartVisual = true;
+        lineExtending = true;
     }
 
     private void Update()
-    {
-        lr.SetPosition(0, origin.position);
-        lineDirection = Vector3.up;
-        if (flagStartVisual)
-        {
-            line += lineDirection * chargeTime* Time.deltaTime;
-        }
-        else
-        {
-            line=origin.position;
-        }
-        lr.SetPosition(1, line);
-        
+    {        
+        CalculateLineDirection();
+        RotatePoint();
+        lr.SetPosition(0, startPoint.position);
+                
+        currentLength = lineExtending
+        ? currentLength + chargeTime * Time.deltaTime
+        : 0f;
+
+        Vector3 tip = startPoint.position + currentDirection * currentLength;
+        lr.SetPosition(1, tip);
     }
 
+    private void RotatePoint()
+    {        
+        currentDirection = Vector3.Slerp(currentDirection, lineDirection, 10f * Time.deltaTime).normalized;
+    }
+    private void CalculateLineDirection()
+    {
+        lineDirection = aimCamera.forward;
+    }
+    private void GetComponents()
+    {
+        stopWatch = GetComponent<StopWatch>();
+        lr = GetComponent<LineRenderer>();
+        inputManager = GetComponent<InputManager>();
+    }
    
+    private void SubscribeEvents()
+    {
+        stopWatch.StopWatchTime += value => chargeTime = value;
+        inputManager.ChargeStart += LineExtend;
+        inputManager.ChargeEnd += LineErase;
+    }
 }

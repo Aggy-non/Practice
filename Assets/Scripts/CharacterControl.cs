@@ -37,7 +37,8 @@ public class CharacterControl : MonoBehaviour
     private float bufferTimeCounter;
 
     [Header("Camera Settings")]
-    [SerializeField]private Transform cameraPosition;
+    [SerializeField] private Transform cameraPosition;
+    [SerializeField] private Transform aimCameraPosition;
     private Vector3 viewDir;
     private Transform orientation;
 
@@ -137,7 +138,7 @@ public class CharacterControl : MonoBehaviour
        
         if (isGrounded)
         {
-            CharacterJump(normalJumpForce);
+            CharacterJump(normalJumpForce,Vector3.up);
         }
         else
         {
@@ -149,21 +150,22 @@ public class CharacterControl : MonoBehaviour
 
     private void ChargeJump(float chargeJumpPower)
     {
-        CharacterJump((chargeJumpPower*chargeMultiplier) + normalJumpForce);
+        CharacterJump((chargeJumpPower*chargeMultiplier) + normalJumpForce,aimCameraPosition.forward);
         Debug.Log("final jump power"+chargeJumpPower);
     }
 
-    private void CharacterJump(float jumpForce)
+    private void CharacterJump(float jumpForce,Vector3 jumpDirection)
     {
         rb.linearVelocity = new(rb.linearVelocity.x, 0, rb.linearVelocity.z);
-        rb.AddForce(0, jumpForce, 0, ForceMode.Impulse);
+        rb.AddForce(jumpDirection*jumpForce, ForceMode.Impulse);
     }
 
     private void RotatePlayer()
     {
+        float rotateSpeed = 10f;
         if (InputDir != Vector3.zero)
         {
-            transform.forward=Vector3.Slerp(transform.forward, InputDir, 10*Time.deltaTime);
+            transform.forward=Vector3.Slerp(transform.forward, MoveDir, rotateSpeed*Time.deltaTime);
         }
     }
 
@@ -175,7 +177,7 @@ public class CharacterControl : MonoBehaviour
         {
             if (isGrounded)
             {
-                CharacterJump(normalJumpForce);
+                CharacterJump(normalJumpForce, Vector3.up);
                 yield break;
             }
 
