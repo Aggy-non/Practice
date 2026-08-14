@@ -19,6 +19,8 @@ public class CharacterControl : MonoBehaviour
     [Header("Movement settings")]
     [SerializeField] private float maxSpeed;
     [SerializeField] private float moveSpeed;
+    [Range(0f, 1f)]
+    [SerializeField] private float chargeJumpMoveSpeed;
     private Vector3 InputDir;
     private Vector3 MoveDir;
 
@@ -26,7 +28,9 @@ public class CharacterControl : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] private float landDrag;
     [Range (0f, 1f)]
-    [SerializeField] private float airDrag;    
+    [SerializeField] private float airDrag;
+    [Range(0f, 1f)]
+    [SerializeField] private float chargeJumpAirDrag;
     private float gravityScale=1f;
     [SerializeField] private float landGravityScale; 
     [SerializeField] private float airGravityScale;
@@ -35,6 +39,8 @@ public class CharacterControl : MonoBehaviour
     [SerializeField] private float normalJumpForce;
     [SerializeField] private float bufferTime;
     private float bufferTimeCounter;
+    private enum LastJumpType { None, Normal, Charge }
+    private LastJumpType lastJumpType = LastJumpType.None;
 
     [Header("Camera Settings")]
     [SerializeField] private Transform cameraPosition;
@@ -44,7 +50,6 @@ public class CharacterControl : MonoBehaviour
 
     [Header("Charge Jump")]
     [SerializeField] private int chargeMultiplier;
-    
     private StopWatch stopWatch;
     
 
@@ -86,35 +91,54 @@ public class CharacterControl : MonoBehaviour
     }
     private void MoveCharacter()
     {
-        rb.AddForce(MoveDir * moveSpeed , ForceMode.VelocityChange);
+        float multiplier;
+        if (lastJumpType == LastJumpType.Charge)
+        {
+            multiplier=chargeJumpMoveSpeed;
+        }
+        else
+        {
+            multiplier = 1;
+        }
+
+        rb.AddForce(MoveDir * moveSpeed* multiplier, ForceMode.VelocityChange);
     }
 
     private void DragControl()
     {
-        float currentDrag;
         if (isGrounded)
         {
-            currentDrag = landDrag;
             gravityScale = landGravityScale;
+            ApplyDrag(landDrag);
         }
         else
-        {
-            currentDrag = airDrag;    
+        {   
             gravityScale = airGravityScale;
+            float drag = (lastJumpType == LastJumpType.Charge) ? chargeJumpAirDrag : airDrag;
+            ApplyDrag(drag);
         }
 
-        //seperate setting drag and applying drag 
+        //seperate setting drag and applying drag       
+    }
 
+    private void ApplyDrag(float drag)
+    {
         Vector3 vel = rb.linearVelocity;
-        vel.x *= currentDrag;
-        vel.z *= currentDrag;
+        vel.x *= drag;
+        vel.z *= drag;
         rb.linearVelocity = vel;
     }
 
     private void GroundCheck()
-    {                
+    {
+        bool wasGrounded = isGrounded;
         Vector3 origin = transform.TransformPoint(charCollider.center);
-        isGrounded = Physics.SphereCast(origin, feetRadius, Vector3.down, out RaycastHit hitInfo, groundCheckDistance, groundLayer);               
+        isGrounded = Physics.SphereCast(origin, feetRadius, Vector3.down, out RaycastHit hitInfo, groundCheckDistance, groundLayer);
+
+        if (!wasGrounded && isGrounded)
+        {
+            lastJumpType = LastJumpType.None; // just landed
+        }
     }
 
 
@@ -138,6 +162,7 @@ public class CharacterControl : MonoBehaviour
        
         if (isGrounded)
         {
+            lastJumpType = LastJumpType.Normal;
             CharacterJump(normalJumpForce,Vector3.up);
         }
         else
@@ -150,8 +175,9 @@ public class CharacterControl : MonoBehaviour
 
     private void ChargeJump(float chargeJumpPower)
     {
+        lastJumpType = LastJumpType.Charge;
         CharacterJump((chargeJumpPower*chargeMultiplier) + normalJumpForce,aimCameraPosition.forward);
-        Debug.Log("final jump power"+chargeJumpPower);
+        //Debug.Log("final jump power"+chargeJumpPower);
     }
 
     private void CharacterJump(float jumpForce,Vector3 jumpDirection)
@@ -177,6 +203,7 @@ public class CharacterControl : MonoBehaviour
         {
             if (isGrounded)
             {
+                lastJumpType = LastJumpType.Normal;
                 CharacterJump(normalJumpForce, Vector3.up);
                 yield break;
             }

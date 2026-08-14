@@ -34,7 +34,7 @@ public class InputManager : MonoBehaviour
             //To change charge jump threshold go to input system map to change it
                      
             ChargeEnd?.Invoke();
-            Debug.Log("Charge jump is performed ");
+            //Debug.Log("Charge jump is performed ");
             chargeStarted = false;
         }
 
@@ -52,7 +52,7 @@ public class InputManager : MonoBehaviour
     {
         //start charging the charge jump
         chargeStarted = true;
-        Debug.Log("Charging");
+        //Debug.Log("Charging");
         ChargeStart?.Invoke();
     }
 
@@ -69,8 +69,6 @@ public class InputManager : MonoBehaviour
     {
         //crouch logic
     }
-
-   
 
     private void InputLinking()
     {

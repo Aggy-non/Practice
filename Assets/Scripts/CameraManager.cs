@@ -6,6 +6,7 @@ public class CameraManager : MonoBehaviour
 {
     [SerializeField] private CinemachineCamera zoomCamera;
     [SerializeField] private CinemachineCamera orbitCamera;
+    [SerializeField] private CanvasGroup crosshairGroup;
     //[SerializeField] private bool isAim=false;
 
     private InputManager inputManager;
@@ -17,38 +18,22 @@ public class CameraManager : MonoBehaviour
         inputManager.ChargeEnd += MainCameraActive;
         SetPriority(zoomCamera, 0);
         SetPriority(orbitCamera, 10);
+        crosshairGroup.alpha = 0f;
     }
 
-    
-
-    private void Update()
-    {
-        
-    }
-    /*private void SetActiveCamera()
-    {
-        if(isAim)
-        {
-            zoomCamera.gameObject.SetActive(true);
-            orbitCamera.gameObject.SetActive(false);
-        }
-        else
-        {
-            zoomCamera.gameObject.SetActive(false); 
-            orbitCamera.gameObject.SetActive(true);
-        }
-    }*/
 
     private void AimCameraActive()
     {
         SetPriority(zoomCamera, 20);
         SetPriority(orbitCamera, 10);
+        crosshairGroup.alpha = 1f;
     }
 
     private void MainCameraActive()
     {
         SetPriority(zoomCamera, 0);
         SetPriority(orbitCamera, 10);
+        crosshairGroup.alpha = 0f;
     }
 
     private void SetPriority(CinemachineCamera cam, int value)
