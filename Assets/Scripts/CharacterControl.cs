@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.Cinemachine;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -28,15 +29,18 @@ public class CharacterControl : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] private float landDrag;
     [Range (0f, 1f)]
-    [SerializeField] private float airDrag;
+    [SerializeField] private float airDrag;    
     [Range(0f, 1f)]
     [SerializeField] private float chargeJumpAirDrag;
+    public float ChargeJumpAirDrag => chargeJumpAirDrag;
     private float gravityScale=1f;
     [SerializeField] private float landGravityScale; 
     [SerializeField] private float airGravityScale;
+    public float AirGravityScale => airGravityScale;
 
     [Header("Jump settings")]
     [SerializeField] private float normalJumpForce;
+    public float NormalJumpForce => normalJumpForce;
     [SerializeField] private float bufferTime;
     private float bufferTimeCounter;
     private enum LastJumpType { None, Normal, Charge }
@@ -45,11 +49,14 @@ public class CharacterControl : MonoBehaviour
     [Header("Camera Settings")]
     [SerializeField] private Transform cameraPosition;
     [SerializeField] private Transform aimCameraPosition;
+    [SerializeField] private CinemachineCamera aimCamera;
+    [SerializeField] private Camera mainCamera;
     private Vector3 viewDir;
     private Transform orientation;
 
     [Header("Charge Jump")]
     [SerializeField] private int chargeMultiplier;
+    public int ChargeMultiplier => chargeMultiplier;
     private StopWatch stopWatch;
     
 
@@ -75,7 +82,7 @@ public class CharacterControl : MonoBehaviour
 
     private void FixedUpdate()
     {
-        //make a seperate class for these 2
+        //make a seperate class for these gravity and drag
         CustomGravity();
         DragControl();
         MoveCharacter();
@@ -188,10 +195,20 @@ public class CharacterControl : MonoBehaviour
 
     private void RotatePlayer()
     {
+        Vector3 faceDir;
+        if (aimCamera.Priority==20)
+        {
+            //not working
+            faceDir = Vector3.ProjectOnPlane(mainCamera.transform.forward, Vector3.up).normalized;
+        }
+        else
+        {
+            faceDir = MoveDir;
+        }
         float rotateSpeed = 10f;
         if (InputDir != Vector3.zero)
         {
-            transform.forward=Vector3.Slerp(transform.forward, MoveDir, rotateSpeed*Time.deltaTime);
+            transform.forward=Vector3.Slerp(transform.forward, faceDir, rotateSpeed*Time.deltaTime);
         }
     }
 
