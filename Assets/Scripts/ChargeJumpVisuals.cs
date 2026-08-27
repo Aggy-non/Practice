@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 
 public class ChargeJumpVisuals : MonoBehaviour
@@ -5,7 +6,6 @@ public class ChargeJumpVisuals : MonoBehaviour
     [Header("Components")]
     [SerializeField] private Transform aimCamera;
     [SerializeField] private Transform startPoint;
-    [SerializeField] private Transform targetPoint;
 
     private InputManager inputManager;
     private StopWatch stopWatch;
@@ -19,8 +19,12 @@ public class ChargeJumpVisuals : MonoBehaviour
 
     [Header("Arc preview settings")]
     [SerializeField] private int maxSimSteps = 120;
-
     private Vector3[] arcPoints;
+
+    [Header("Collision settings")]
+    [SerializeField] private LayerMask blockingLayers; 
+    [SerializeField] private float backoffDistance = 0.1f;
+    [SerializeField] private GameObject targetVisual;
 
     private void Start()
     {
@@ -28,18 +32,23 @@ public class ChargeJumpVisuals : MonoBehaviour
         lr.useWorldSpace = true;
         arcPoints = new Vector3[maxSimSteps];
         SubscribeEvents();
+        targetVisual=Instantiate(targetVisual);
+        targetVisual.SetActive(false);
     }
 
     private void Update()
     {
         RotateDirection();
+        //UpdateTargetPosition(rotatio, positio);
 
         if (!lineExtending)
         {
             return;
         }
-
-        SimulateArc();
+        else
+        {
+            SimulateArc();
+        }
         //UpdateTargetPosition();
     }
 
@@ -57,10 +66,10 @@ public class ChargeJumpVisuals : MonoBehaviour
     {
         float jumpForce = chargeTime * characterControl.ChargeMultiplier + characterControl.NormalJumpForce;
 
-        Vector3 startVel = rb.linearVelocity;
-        startVel.y = 0f; // matches CharacterJump zeroing vertical velocity before the impulse
+        Vector3 startVel = rb.linearVelocity; // shift the rb linear velocity to a new class to avoid errors
+        startVel.y = 0f;
 
-        Vector3 simVel = startVel + (currentDirection * jumpForce) / rb.mass; // ForceMode.Impulse = force / mass
+        Vector3 simVel = startVel + (currentDirection * jumpForce) / rb.mass;
         Vector3 simPos = startPoint.position;
 
         float dragDecay = Mathf.Exp(-characterControl.ChargeJumpAirDrag * Time.fixedDeltaTime);
@@ -71,10 +80,34 @@ public class ChargeJumpVisuals : MonoBehaviour
 
         for (int i = 1; i < maxSimSteps; i++)
         {
+            Vector3 prevPos = simPos;
+
             simVel.y += gravityAccel * Time.fixedDeltaTime;
             simVel.x *= dragDecay;
             simVel.z *= dragDecay;
             simPos += simVel * Time.fixedDeltaTime;
+
+            Vector3 segment = simPos - prevPos;
+            float segmentLength = segment.magnitude;
+
+            if (segmentLength > 0.0001f)
+            {
+                Vector3 segmentDir = segment / segmentLength;
+
+                if (Physics.Raycast(prevPos, segmentDir, out RaycastHit hit, segmentLength, blockingLayers))
+                {
+                    targetVisual.SetActive(true);
+                    Vector3 targetNormal = hit.normal;
+                    Vector3 targetLocation = hit.point;
+                    UpdateTargetPosition(hit.normal, hit.point);
+                    arcPoints[pointCount++] = hit.point - segmentDir * backoffDistance;
+                    break;
+                }
+                else
+                {
+                    targetVisual.SetActive(false);
+                }
+            }
 
             arcPoints[pointCount++] = simPos;
 
@@ -90,6 +123,7 @@ public class ChargeJumpVisuals : MonoBehaviour
 
     private void LineErase()
     {
+        targetVisual.SetActive(false);
         lineExtending = false;
         lr.positionCount = 0;
     }
@@ -99,17 +133,10 @@ public class ChargeJumpVisuals : MonoBehaviour
         lineExtending = true;
     }
 
-    private void UpdateTargetPosition()
+    private void UpdateTargetPosition(Vector3 normal, Vector3 position)
     {
-
-        if (!lineExtending)
-        {
-            targetPoint.position = transform.position;
-        }
-        else
-        {
-
-        }
+        targetVisual.transform.SetPositionAndRotation(position, Quaternion.FromToRotation(Vector3.up, normal));
+        //Debug.Log("normal:" + normal +"position:" + position);
     }
 
     private void GetComponents()
