@@ -14,6 +14,7 @@ public class InputManager : MonoBehaviour
     public event Action NormalJump;
     public event Action ChargeStart;
     public event Action ChargeEnd;
+    public event Action StartJumping;
 
     private void Awake()
     {
@@ -25,7 +26,12 @@ public class InputManager : MonoBehaviour
         // just log it for now we'll make it send event args later
         ReturnMovementVector();
     }
-    private void JumpInput(InputAction.CallbackContext context)
+
+    private void JumpStarted(InputAction.CallbackContext context)
+    {
+        StartJumping?.Invoke();
+    }
+    private void JumpPerformed(InputAction.CallbackContext context)
     {
 
         if (chargeStarted)
@@ -74,7 +80,8 @@ public class InputManager : MonoBehaviour
     {
         //link each input event to its method
         playerInputs.CharacterControls.Enable();
-        playerInputs.CharacterControls.Jump.canceled += JumpInput;
+        playerInputs.CharacterControls.Jump.started += JumpStarted;
+        playerInputs.CharacterControls.Jump.canceled += JumpPerformed;
         playerInputs.CharacterControls.Jump.performed += StartJumpCharge;
         playerInputs.CharacterControls.Crouch.performed += CrouchOrRollInput;         
     }

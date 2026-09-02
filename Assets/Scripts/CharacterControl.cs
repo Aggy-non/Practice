@@ -23,7 +23,7 @@ public class CharacterControl : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] private float chargeJumpMoveSpeed;
     private Vector3 InputDir;
-    private Vector3 MoveDir;
+    private Vector3 moveDir;
 
     [Header("Physics settings")]    
     [Range(0f, 1f)]
@@ -43,6 +43,7 @@ public class CharacterControl : MonoBehaviour
     public float NormalJumpForce => normalJumpForce;
     [SerializeField] private float bufferTime;
     private float bufferTimeCounter;
+    private bool jumpStart;
     private enum LastJumpType { None, Normal, Charge }
     private LastJumpType lastJumpType = LastJumpType.None;
 
@@ -94,11 +95,11 @@ public class CharacterControl : MonoBehaviour
         Vector3 camForward = Vector3.ProjectOnPlane(cameraPosition.forward, Vector3.up).normalized;
         Vector3 camRight = Vector3.ProjectOnPlane(cameraPosition.right, Vector3.up).normalized;
 
-        MoveDir = camForward * InputDir.z + camRight * InputDir.x;
+        moveDir = camForward * InputDir.z + camRight * InputDir.x;
     }
     private void MoveCharacter()
     {
-        float multiplier;
+        float multiplier;        
         if (lastJumpType == LastJumpType.Charge)
         {
             multiplier=chargeJumpMoveSpeed;
@@ -107,8 +108,17 @@ public class CharacterControl : MonoBehaviour
         {
             multiplier = 1;
         }
-
-        rb.AddForce(MoveDir * moveSpeed* multiplier, ForceMode.VelocityChange);
+        int isJumpStarted;
+        if (jumpStart)
+        {
+            isJumpStarted = 0;
+            rb.linearVelocity = Vector3.zero;
+        }
+        else
+        {
+            isJumpStarted = 1;
+        }       
+        rb.AddForce(moveDir * moveSpeed* multiplier* isJumpStarted, ForceMode.VelocityChange);
     }
 
     private void DragControl()
@@ -119,7 +129,8 @@ public class CharacterControl : MonoBehaviour
             ApplyDrag(landDrag);
         }
         else
-        {   
+        {
+            jumpStart = false;
             gravityScale = airGravityScale;
             float drag = (lastJumpType == LastJumpType.Charge) ? chargeJumpAirDrag : airDrag;
             ApplyDrag(drag);
@@ -169,8 +180,9 @@ public class CharacterControl : MonoBehaviour
        
         if (isGrounded)
         {
+            
             lastJumpType = LastJumpType.Normal;
-            CharacterJump(normalJumpForce,Vector3.up);
+            CharacterJump(normalJumpForce,Vector3.up);            
         }
         else
         {
@@ -189,27 +201,36 @@ public class CharacterControl : MonoBehaviour
 
     private void CharacterJump(float jumpForce,Vector3 jumpDirection)
     {
+        jumpStart = false;
         rb.linearVelocity = new(rb.linearVelocity.x, 0, rb.linearVelocity.z);
         rb.AddForce(jumpDirection*jumpForce, ForceMode.Impulse);
     }
 
     private void RotatePlayer()
     {
-        Vector3 faceDir;
-        if (aimCamera.Priority==20)
+        Vector3 faceDir=transform.forward;
+        
+        //if (aimCamera.Priority==20)
+        //{
+        //    //not working
+        //    faceDir = Vector3.ProjectOnPlane(mainCamera.transform.forward, Vector3.up).normalized;
+        //}
+        //else
+        //{
+                       
+        //}
+        
+        //if (InputDir != Vector3.zero)
+        //{
+        //    transform.forward=Vector3.Slerp(transform.forward, faceDir, rotateSpeed*Time.deltaTime);
+        //}
+        if (moveDir != Vector3.zero)
         {
-            //not working
-            faceDir = Vector3.ProjectOnPlane(mainCamera.transform.forward, Vector3.up).normalized;
+            faceDir = moveDir;
+            
         }
-        else
-        {
-            faceDir = MoveDir;
-        }
-        float rotateSpeed = 10f;
-        if (InputDir != Vector3.zero)
-        {
-            transform.forward=Vector3.Slerp(transform.forward, faceDir, rotateSpeed*Time.deltaTime);
-        }
+        float rotateSpeed = 17f;
+        transform.forward = Vector3.Slerp(transform.forward, faceDir, rotateSpeed * Time.deltaTime);
     }
 
     private IEnumerator BufferJump()
@@ -253,7 +274,13 @@ public class CharacterControl : MonoBehaviour
     {
         inputManager.GetMovementVector += value => InputDir = value;
         inputManager.NormalJump += PerformNormalJump;
+        inputManager.StartJumping += StartJumping;
         stopWatch.ChargeJumpHoldTime += ChargeJump;
     }
-    
+
+    private void StartJumping()
+    {
+        jumpStart = true;
+        
+    }
 }
