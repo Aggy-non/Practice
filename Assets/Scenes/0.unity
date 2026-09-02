@@ -206,8 +206,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 92689280}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.1988769, y: 0.000000026174154, z: -0.0000000053115348, w: 0.9800245}
-  m_LocalPosition: {x: 1.36, y: 3.6476002, z: -5.85}
+  m_LocalRotation: {x: 0.060047567, y: -0.00086097186, z: 0.000051792744, w: 0.9981952}
+  m_LocalPosition: {x: 1.3599823, y: 4.299471, z: -10.369724}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2876,7 +2876,7 @@ MonoBehaviour:
   aimCameraPosition: {fileID: 797884913}
   aimCamera: {fileID: 797884912}
   mainCamera: {fileID: 92689282}
-  chargeMultiplier: 20
+  chargeMultiplier: 15
 --- !u!114 &1689519852
 MonoBehaviour:
   m_ObjectHideFlags: 0
