@@ -26,11 +26,11 @@ public class CharacterControl : MonoBehaviour
     private Vector3 moveDir;
 
     [Header("Physics settings")]    
-    [Range(0f, 1f)]
+    [Range(0f, 100f)]
     [SerializeField] private float landDrag;
-    [Range (0f, 1f)]
+    [Range (0f, 100f)]
     [SerializeField] private float airDrag;    
-    [Range(0f, 1f)]
+    [Range(0f, 100f)]
     [SerializeField] private float chargeJumpAirDrag;
     public float ChargeJumpAirDrag => chargeJumpAirDrag;
     private float gravityScale=1f;
@@ -127,6 +127,7 @@ public class CharacterControl : MonoBehaviour
         {
             gravityScale = landGravityScale;
             ApplyDrag(landDrag);
+            
         }
         else
         {
@@ -134,6 +135,7 @@ public class CharacterControl : MonoBehaviour
             gravityScale = airGravityScale;
             float drag = (lastJumpType == LastJumpType.Charge) ? chargeJumpAirDrag : airDrag;
             ApplyDrag(drag);
+           
         }
 
         //seperate setting drag and applying drag       
@@ -142,8 +144,9 @@ public class CharacterControl : MonoBehaviour
     private void ApplyDrag(float drag)
     {
         Vector3 vel = rb.linearVelocity;
-        vel.x *= drag;
-        vel.z *= drag;
+        float dampFactor = Mathf.Exp(-drag * Time.fixedDeltaTime);
+        vel.x *= dampFactor;
+        vel.z *= dampFactor;
         rb.linearVelocity = vel;
     }
 
@@ -193,10 +196,10 @@ public class CharacterControl : MonoBehaviour
     }
 
     private void ChargeJump(float chargeJumpPower)
-    {
+    {       
         lastJumpType = LastJumpType.Charge;
         CharacterJump((chargeJumpPower*chargeMultiplier) + normalJumpForce,aimCameraPosition.forward);
-        //Debug.Log("final jump power"+chargeJumpPower);
+        
     }
 
     private void CharacterJump(float jumpForce,Vector3 jumpDirection)

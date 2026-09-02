@@ -109,12 +109,7 @@ public class ChargeJumpVisuals : MonoBehaviour
                 }
             }
 
-            arcPoints[pointCount++] = simPos;
-
-            if (simPos.y <= startPoint.position.y)
-            {
-                break;
-            }
+            arcPoints[pointCount++] = simPos;           
         }
 
         lr.positionCount = pointCount;

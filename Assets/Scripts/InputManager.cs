@@ -47,7 +47,7 @@ public class InputManager : MonoBehaviour
         else 
         {
             //normal jump
-            //Debug.Log("Normal Jump " + context.phase);
+            //Debug.Log("Normal Jump " + context.phase);;
             NormalJump?.Invoke();
         }
         
