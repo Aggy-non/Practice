@@ -16,6 +16,7 @@ public class CameraManager : MonoBehaviour
         inputManager = GetComponent<InputManager>();
         inputManager.ChargeStart += AimCameraActive;
         inputManager.ChargeEnd += MainCameraActive;
+        inputManager.CancelJumping += MainCameraActive;
         SetPriority(zoomCamera, 0);
         SetPriority(orbitCamera, 10);
         

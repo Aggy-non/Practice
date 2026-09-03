@@ -148,5 +148,6 @@ public class ChargeJumpVisuals : MonoBehaviour
         stopWatch.StopWatchTime += value => chargeTime = value;
         inputManager.ChargeStart += LineExtend;
         inputManager.ChargeEnd += LineErase;
+        inputManager.CancelJumping += LineErase;
     }
 }

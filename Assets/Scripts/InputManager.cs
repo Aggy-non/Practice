@@ -7,6 +7,7 @@ using UnityEngine.InputSystem;
 public class InputManager : MonoBehaviour
 {
     private bool chargeStarted=false;
+    private bool cancelJump=false;
     private Vector3 movementVector;
     private PlayerInputs playerInputs;
 
@@ -15,6 +16,7 @@ public class InputManager : MonoBehaviour
     public event Action ChargeStart;
     public event Action ChargeEnd;
     public event Action StartJumping;
+    public event Action CancelJumping;
 
     private void Awake()
     {
@@ -30,6 +32,17 @@ public class InputManager : MonoBehaviour
     private void JumpStarted(InputAction.CallbackContext context)
     {
         StartJumping?.Invoke();
+    }
+
+    private void CancelChargeJump(InputAction.CallbackContext obj)
+    {
+        if (chargeStarted)
+        {
+            chargeStarted = false;
+            CancelJumping?.Invoke();
+            cancelJump = true;
+            //Debug.Log("Cancelled");
+        }        
     }
     private void JumpPerformed(InputAction.CallbackContext context)
     {
@@ -47,8 +60,16 @@ public class InputManager : MonoBehaviour
         else 
         {
             //normal jump
-            //Debug.Log("Normal Jump " + context.phase);;
-            NormalJump?.Invoke();
+            //Debug.Log("Normal Jump " + context.phase);
+            if (cancelJump)
+            {
+                cancelJump = false;
+                return;                
+            }
+            else
+            {
+                NormalJump?.Invoke();
+            }
         }
         
     }
@@ -83,8 +104,10 @@ public class InputManager : MonoBehaviour
         playerInputs.CharacterControls.Jump.started += JumpStarted;
         playerInputs.CharacterControls.Jump.canceled += JumpPerformed;
         playerInputs.CharacterControls.Jump.performed += StartJumpCharge;
-        playerInputs.CharacterControls.Crouch.performed += CrouchOrRollInput;         
+        playerInputs.CharacterControls.Crouch.performed += CrouchOrRollInput;
+        playerInputs.CharacterControls.ChargeJumpCancel.performed += CancelChargeJump;
     }
+
     private void OnDestroy()
     {
         // this line prevents memory leak

@@ -4,6 +4,7 @@ using UnityEngine;
 public class StopWatch : MonoBehaviour
 {
     private InputManager inputManager;
+    private CharacterControl characterControl;
 
     public float stopwatchTime { get; private set; }
 
@@ -13,8 +14,10 @@ public class StopWatch : MonoBehaviour
     void Start()
     {
         inputManager = GetComponent<InputManager>();
+        characterControl = GetComponent<CharacterControl>();
         inputManager.ChargeStart += StartStopwatch;
-        inputManager.ChargeEnd += StopStopWatch;
+        inputManager.ChargeEnd += FinishStopWatch;
+        inputManager.CancelJumping += CancelStopWatch;
     }
 
     void Update()
@@ -28,10 +31,16 @@ public class StopWatch : MonoBehaviour
         isRunning = true;
     }
 
-    private void StopStopWatch()
+    private void FinishStopWatch()
     {
         isRunning = false;
         ChargeJumpHoldTime?.Invoke(stopwatchTime);
+        ResetTimer();
+    }
+
+    private void CancelStopWatch()
+    {
+        isRunning=false;
         ResetTimer();
     }
     
