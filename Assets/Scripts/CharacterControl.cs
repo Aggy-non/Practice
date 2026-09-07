@@ -59,6 +59,9 @@ public class CharacterControl : MonoBehaviour
     [SerializeField] private int chargeMultiplier;
     public int ChargeMultiplier => chargeMultiplier;
     private StopWatch stopWatch;
+
+    [Header("Wall Climb")]
+    private bool isWallClimbing;
     
 
     #endregion
@@ -77,7 +80,7 @@ public class CharacterControl : MonoBehaviour
     private void Update()
     {        
         GroundCheck();
-        CalculateMoveDir();
+        CalculateCurrentMoveDir();
         
     }
 
@@ -90,12 +93,36 @@ public class CharacterControl : MonoBehaviour
         RotatePlayer();
     }
 
-    private void CalculateMoveDir()
+    private void CalculateCurrentMoveDir()
+    {
+        if (isWallClimbing)
+        {
+            moveDir = CalculateWallMoveDir();
+        }
+        else
+        {
+            moveDir = CalculateFloorMoveDir();
+        }
+    }
+    private Vector3 CalculateFloorMoveDir()
     {
         Vector3 camForward = Vector3.ProjectOnPlane(cameraPosition.forward, Vector3.up).normalized;
         Vector3 camRight = Vector3.ProjectOnPlane(cameraPosition.right, Vector3.up).normalized;
 
-        moveDir = camForward * InputDir.z + camRight * InputDir.x;
+        //moveDir = camForward * InputDir.z + camRight * InputDir.x;
+        Vector3 normalizedReturnVector= (camForward * InputDir.y + camRight * InputDir.x).normalized;        
+        return normalizedReturnVector;
+    }
+
+    private Vector3 CalculateWallMoveDir()
+    {
+        Vector3 wallMoveDir;
+        wallMoveDir.y = InputDir.y;
+        wallMoveDir.x = 0;
+        wallMoveDir.z = 0;
+        //!!!GIVE THE PROPER VALUES FOR X AND Z!!!
+
+        return wallMoveDir;
     }
     private void MoveCharacter()
     {
@@ -278,7 +305,13 @@ public class CharacterControl : MonoBehaviour
         inputManager.GetMovementVector += value => InputDir = value;
         inputManager.NormalJump += PerformNormalJump;
         inputManager.StartJumping += StartJumping;
+        inputManager.CancelJumping += CancelJumping;
         stopWatch.ChargeJumpHoldTime += ChargeJump;
+    }
+
+    private void CancelJumping()
+    {
+        jumpStart = false;
     }
 
     private void StartJumping()

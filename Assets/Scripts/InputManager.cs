@@ -87,9 +87,8 @@ public class InputManager : MonoBehaviour
     {         
         //return the direction in which player should move
         Vector2 inputVector = playerInputs.CharacterControls.Movement.ReadValue<Vector2>();
-        movementVector = new(inputVector.x, 0, inputVector.y);
-        
-        GetMovementVector?.Invoke(movementVector);
+        //movementVector = new(inputVector.x, 0, inputVector.y);
+        GetMovementVector?.Invoke(inputVector);
     }
 
     private void CrouchOrRollInput(InputAction.CallbackContext context)
