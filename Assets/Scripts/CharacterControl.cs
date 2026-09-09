@@ -24,6 +24,7 @@ public class CharacterControl : MonoBehaviour
     [SerializeField] private float chargeJumpMoveSpeed;
     private Vector3 InputDir;
     private Vector3 moveDir;
+    private Vector3 faceDir;
 
     [Header("Physics settings")]    
     [Range(0f, 100f)]
@@ -67,7 +68,12 @@ public class CharacterControl : MonoBehaviour
     [SerializeField] Transform wallCheckPoint;
     [SerializeField] float wallCheckDistance;
     private bool isWallClimbing;
-    
+    private enum Surface { Wall, Ground, Air}
+    private Surface currentSurface= Surface.Air;
+    private bool prevGroundedState = true;
+    private bool prevWallClimbingState = false;
+    private RaycastHit wallHit;
+
 
     #endregion
     private void Awake()
@@ -86,21 +92,22 @@ public class CharacterControl : MonoBehaviour
     {        
         GroundCheck();
         CalculateCurrentMoveDir();
-        CheckForWall();
+        WallCheck();
     }
 
     private void FixedUpdate()
     {
         //make a seperate class for these gravity and drag
         CustomGravity();
-        DragControl();
+        UpdatePhysicsState();
         MoveCharacter();
-        //RotatePlayer();
+        RotatePlayer();
+        //print("wallcheck: " + isWallClimbing + " groundcheck: " + isGrounded);
     }
 
     private void CalculateCurrentMoveDir()
     {
-        if (isWallClimbing)
+        if (currentSurface==Surface.Wall)
         {
             moveDir = CalculateWallMoveDir();
         }
@@ -115,19 +122,22 @@ public class CharacterControl : MonoBehaviour
         Vector3 camRight = Vector3.ProjectOnPlane(cameraPosition.right, Vector3.up).normalized;
 
         //moveDir = camForward * InputDir.z + camRight * InputDir.x;
-        Vector3 normalizedReturnVector= (camForward * InputDir.y + camRight * InputDir.x).normalized;        
+        Vector3 normalizedReturnVector= (camForward * InputDir.y + camRight * InputDir.x).normalized;
+        if (normalizedReturnVector != Vector3.zero)
+        {
+            faceDir = normalizedReturnVector;
+        }
         return normalizedReturnVector;
     }
 
     private Vector3 CalculateWallMoveDir()
     {
-        Vector3 wallMoveDir;
-        wallMoveDir.y = InputDir.y;
-        wallMoveDir.x = 0;
-        wallMoveDir.z = 0;
-        //!!!GIVE THE PROPER VALUES FOR X AND Z!!!
+        faceDir = -wallHit.normal;
+        Vector3 wallRight = Vector3.Cross(Vector3.up, faceDir).normalized;
+        Vector3 wallForward = Vector3.Cross(faceDir, wallRight).normalized;
+        Vector3 wallMoveDir = wallRight * InputDir.x + wallForward * InputDir.y;
 
-        return wallMoveDir;
+        return wallMoveDir.normalized;
     }
     private void MoveCharacter()
     {
@@ -153,35 +163,62 @@ public class CharacterControl : MonoBehaviour
         rb.AddForce(moveDir * moveSpeed* multiplier* isJumpStarted, ForceMode.VelocityChange);
     }
 
-    private void DragControl()
+    private void UpdatePhysicsState()
     {
-        if (isGrounded && !isWallClimbing)
+        if (isGrounded && isWallClimbing)
         {
-            gravityScale = landGravityScale;
-            ApplyDrag(landDrag);
-            
+            bool wallJustEngaged = isWallClimbing && !prevWallClimbingState;
+            bool groundJustEngaged = isGrounded && !prevGroundedState;
+
+            if (wallJustEngaged)
+                currentSurface = Surface.Wall;
+            else if (groundJustEngaged)
+                currentSurface = Surface.Ground;
+            // else: hold whichever mode we already resolved to
         }
-        else if(!isGrounded && !isWallClimbing)
+        else if (isGrounded)
         {
-            jumpStart = false;
-            gravityScale = airGravityScale;
-            float drag = (lastJumpType == LastJumpType.Charge) ? chargeJumpAirDrag : airDrag;
-            ApplyDrag(drag);
-           
+            currentSurface = Surface.Ground;
         }
-        else if (isWallClimbing && !isGrounded)
+        else if (isWallClimbing)
         {
-            ApplyDrag(wallDrag);
-            gravityScale = wallGravityScale;
+            currentSurface = Surface.Wall;
+        }
+        else
+        {
+            currentSurface = Surface.Air;
         }
 
-        //seperate setting drag and applying drag       
+        switch (currentSurface)
+        {
+            case Surface.Ground:
+                gravityScale = landGravityScale;
+                ApplyDrag(landDrag);
+                break;
+            case Surface.Wall:
+                gravityScale = wallGravityScale;
+                ApplyDrag(wallDrag);
+                break;
+            case Surface.Air:
+                jumpStart = false;
+                gravityScale = airGravityScale;
+                float drag = (lastJumpType == LastJumpType.Charge) ? chargeJumpAirDrag : airDrag;
+                ApplyDrag(drag);
+                break;
+        }
+
+        prevGroundedState = isGrounded;
+        prevWallClimbingState = isWallClimbing;
     }
 
     private void ApplyDrag(float drag)
     {
         Vector3 vel = rb.linearVelocity;
         float dampFactor = Mathf.Exp(-drag * Time.fixedDeltaTime);
+        if (currentSurface==Surface.Wall)
+        {
+            vel.y *= dampFactor;
+        }
         vel.x *= dampFactor;
         vel.z *= dampFactor;
         //Change Drag systems to accomodate Y axis as well
@@ -198,6 +235,21 @@ public class CharacterControl : MonoBehaviour
         {
             lastJumpType = LastJumpType.None; // just landed
         }
+    }
+
+    private void WallCheck()
+    {
+        Vector3 shootDir;
+        if(currentSurface==Surface.Wall)
+        {
+            shootDir = wallHit.normal*-1;            
+        }
+        else
+        {
+            shootDir = moveDir;
+        }
+        Vector3 origin = wallCheckPoint.position;
+        isWallClimbing = Physics.Raycast(origin, shootDir, out wallHit, wallCheckDistance, movementLayer);
     }
 
 
@@ -222,7 +274,7 @@ public class CharacterControl : MonoBehaviour
 
         Gizmos.color = isWallClimbing ? Color.green : Color.red;
         Gizmos.DrawLine(origin, origin + direction * wallCheckDistance);
-        Gizmos.DrawWireSphere(origin + direction * wallCheckDistance, 0.1f);
+        //Gizmos.DrawWireSphere(origin + direction * wallCheckDistance, 0.1f);
     }
 
 
@@ -259,14 +311,7 @@ public class CharacterControl : MonoBehaviour
 
     private void RotatePlayer()
     {
-        Vector3 faceDir=transform.forward;
-        
-        if (moveDir != Vector3.zero)
-        {
-            faceDir = moveDir;
-            
-        }
-        float rotateSpeed = 17f;
+        float rotateSpeed = 16f;
         transform.forward = Vector3.Slerp(transform.forward, faceDir, rotateSpeed * Time.deltaTime);
     }
 
@@ -286,15 +331,8 @@ public class CharacterControl : MonoBehaviour
             bufferTimeCounter-= Time.deltaTime;
             yield return null;            
         }
-    }
+    }    
     
-    
-    private void CheckForWall()
-    {
-        Vector3 origin = wallCheckPoint.position;
-        isWallClimbing = Physics.Raycast(origin, transform.forward, out RaycastHit hit, wallCheckDistance, movementLayer);
-    }
-
     private void CustomGravity()
     {
         rb.AddForce(Physics.gravity * gravityScale, ForceMode.Acceleration);        
