@@ -154,6 +154,15 @@ public partial class @PlayerInputs: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Initiate Wall Climb"",
+                    ""type"": ""Button"",
+                    ""id"": ""809aeb7d-72c1-4b3a-944a-76102eecd0da"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -343,6 +352,17 @@ public partial class @PlayerInputs: IInputActionCollection2, IDisposable
                     ""action"": ""Charge Jump Cancel"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""82d42e17-a216-4fff-9020-9d350f08f2cd"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Initiate Wall Climb"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -375,6 +395,7 @@ public partial class @PlayerInputs: IInputActionCollection2, IDisposable
         m_CharacterControls_Look = m_CharacterControls.FindAction("Look", throwIfNotFound: true);
         m_CharacterControls_Aim = m_CharacterControls.FindAction("Aim", throwIfNotFound: true);
         m_CharacterControls_ChargeJumpCancel = m_CharacterControls.FindAction("Charge Jump Cancel", throwIfNotFound: true);
+        m_CharacterControls_InitiateWallClimb = m_CharacterControls.FindAction("Initiate Wall Climb", throwIfNotFound: true);
     }
 
     ~@PlayerInputs()
@@ -462,6 +483,7 @@ public partial class @PlayerInputs: IInputActionCollection2, IDisposable
     private readonly InputAction m_CharacterControls_Look;
     private readonly InputAction m_CharacterControls_Aim;
     private readonly InputAction m_CharacterControls_ChargeJumpCancel;
+    private readonly InputAction m_CharacterControls_InitiateWallClimb;
     /// <summary>
     /// Provides access to input actions defined in input action map "Character Controls".
     /// </summary>
@@ -501,6 +523,10 @@ public partial class @PlayerInputs: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "CharacterControls/ChargeJumpCancel".
         /// </summary>
         public InputAction @ChargeJumpCancel => m_Wrapper.m_CharacterControls_ChargeJumpCancel;
+        /// <summary>
+        /// Provides access to the underlying input action "CharacterControls/InitiateWallClimb".
+        /// </summary>
+        public InputAction @InitiateWallClimb => m_Wrapper.m_CharacterControls_InitiateWallClimb;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -548,6 +574,9 @@ public partial class @PlayerInputs: IInputActionCollection2, IDisposable
             @ChargeJumpCancel.started += instance.OnChargeJumpCancel;
             @ChargeJumpCancel.performed += instance.OnChargeJumpCancel;
             @ChargeJumpCancel.canceled += instance.OnChargeJumpCancel;
+            @InitiateWallClimb.started += instance.OnInitiateWallClimb;
+            @InitiateWallClimb.performed += instance.OnInitiateWallClimb;
+            @InitiateWallClimb.canceled += instance.OnInitiateWallClimb;
         }
 
         /// <summary>
@@ -580,6 +609,9 @@ public partial class @PlayerInputs: IInputActionCollection2, IDisposable
             @ChargeJumpCancel.started -= instance.OnChargeJumpCancel;
             @ChargeJumpCancel.performed -= instance.OnChargeJumpCancel;
             @ChargeJumpCancel.canceled -= instance.OnChargeJumpCancel;
+            @InitiateWallClimb.started -= instance.OnInitiateWallClimb;
+            @InitiateWallClimb.performed -= instance.OnInitiateWallClimb;
+            @InitiateWallClimb.canceled -= instance.OnInitiateWallClimb;
         }
 
         /// <summary>
@@ -682,5 +714,12 @@ public partial class @PlayerInputs: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnChargeJumpCancel(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Initiate Wall Climb" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnInitiateWallClimb(InputAction.CallbackContext context);
     }
 }

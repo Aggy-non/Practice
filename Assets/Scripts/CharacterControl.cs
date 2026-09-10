@@ -44,6 +44,7 @@ public class CharacterControl : MonoBehaviour
 
     [Header("Jump settings")]
     [SerializeField] private float normalJumpForce;
+    [SerializeField] private float wallJumpForce;
     public float NormalJumpForce => normalJumpForce;
     [SerializeField] private float bufferTime;
     private float bufferTimeCounter;
@@ -67,13 +68,13 @@ public class CharacterControl : MonoBehaviour
     [Header("Wall Climb")]
     [SerializeField] Transform wallCheckPoint;
     [SerializeField] float wallCheckDistance;
-    private bool isWallClimbing;
+    [SerializeField] float wallCheckRadius;
+    
+    private bool wallDetected;
     private enum Surface { Wall, Ground, Air}
     private Surface currentSurface= Surface.Air;
     private bool prevGroundedState = true;
-    private bool prevWallClimbingState = false;
     private RaycastHit wallHit;
-
 
     #endregion
     private void Awake()
@@ -103,6 +104,7 @@ public class CharacterControl : MonoBehaviour
         MoveCharacter();
         RotatePlayer();
         //print("wallcheck: " + isWallClimbing + " groundcheck: " + isGrounded);
+        //print(" surface: " + currentSurface);
     }
 
     private void CalculateCurrentMoveDir()
@@ -151,7 +153,7 @@ public class CharacterControl : MonoBehaviour
             multiplier = 1;
         }
         int isJumpStarted;
-        if (jumpStart)
+        if (jumpStart &&  isGrounded)
         {
             isJumpStarted = 0;
             rb.linearVelocity = Vector3.zero;
@@ -165,24 +167,23 @@ public class CharacterControl : MonoBehaviour
 
     private void UpdatePhysicsState()
     {
-        if (isGrounded && isWallClimbing)
-        {
-            bool wallJustEngaged = isWallClimbing && !prevWallClimbingState;
-            bool groundJustEngaged = isGrounded && !prevGroundedState;
+        bool justLanded = isGrounded && !prevGroundedState;
 
-            if (wallJustEngaged)
-                currentSurface = Surface.Wall;
-            else if (groundJustEngaged)
-                currentSurface = Surface.Ground;
-            // else: hold whichever mode we already resolved to
+        if (currentSurface == Surface.Wall)
+        {
+            if (justLanded)
+            {
+                currentSurface = Surface.Ground; // climbed down and touched the floor
+            }
+            else if (!wallDetected)
+            {
+                currentSurface = Surface.Air; // climbed off the wall's edge
+            }
+            // else: stay on the wall - entry/exit while touching is button-driven now, not automatic
         }
         else if (isGrounded)
         {
             currentSurface = Surface.Ground;
-        }
-        else if (isWallClimbing)
-        {
-            currentSurface = Surface.Wall;
         }
         else
         {
@@ -208,7 +209,6 @@ public class CharacterControl : MonoBehaviour
         }
 
         prevGroundedState = isGrounded;
-        prevWallClimbingState = isWallClimbing;
     }
 
     private void ApplyDrag(float drag)
@@ -246,46 +246,27 @@ public class CharacterControl : MonoBehaviour
         }
         else
         {
-            shootDir = moveDir;
+            shootDir = faceDir;
         }
         Vector3 origin = wallCheckPoint.position;
-        isWallClimbing = Physics.Raycast(origin, shootDir, out wallHit, wallCheckDistance, movementLayer);
-    }
-
-
-    private void OnDrawGizmos()
-    {
-        if (charCollider == null) return; // safety check
-      
-        // World-space origin (the correct way)
-        Vector3 worldOrigin = transform.TransformPoint(charCollider.center);
-
-
-        // --- Draw WORLD space visualization ---
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(worldOrigin, feetRadius);
-        Gizmos.DrawLine(worldOrigin, worldOrigin + Vector3.down * groundCheckDistance);
-        Gizmos.DrawWireSphere(worldOrigin + Vector3.down * groundCheckDistance, feetRadius);
-
-        if (wallCheckPoint == null) return;
-
-        Vector3 origin = wallCheckPoint.position;
-        Vector3 direction = transform.forward;
-
-        Gizmos.color = isWallClimbing ? Color.green : Color.red;
-        Gizmos.DrawLine(origin, origin + direction * wallCheckDistance);
-        //Gizmos.DrawWireSphere(origin + direction * wallCheckDistance, 0.1f);
+        wallDetected = Physics.SphereCast(origin, wallCheckRadius, shootDir, out wallHit, wallCheckDistance, movementLayer);
     }
 
 
     private void PerformNormalJump()
     {
        
-        if (isGrounded)
+        if (currentSurface==Surface.Ground)
         {
             
             lastJumpType = LastJumpType.Normal;
             CharacterJump(normalJumpForce,Vector3.up);            
+        }
+        else if(currentSurface==Surface.Wall)
+        {
+            lastJumpType = LastJumpType.Normal;
+            DetachFromWall();
+            CharacterJump(wallJumpForce, wallHit.normal+new Vector3(0,1,0));
         }
         else
         {
@@ -299,6 +280,7 @@ public class CharacterControl : MonoBehaviour
     {       
         lastJumpType = LastJumpType.Charge;
         CharacterJump((chargeJumpPower*chargeMultiplier) + normalJumpForce,aimCameraPosition.forward);
+        DetachFromWall();
         
     }
 
@@ -357,6 +339,7 @@ public class CharacterControl : MonoBehaviour
         inputManager.NormalJump += PerformNormalJump;
         inputManager.StartJumping += StartJumping;
         inputManager.CancelJumping += CancelJumping;
+        inputManager.ToggleWallClimb += ToggleWallClimb;
         stopWatch.ChargeJumpHoldTime += ChargeJump;
     }
 
@@ -369,5 +352,66 @@ public class CharacterControl : MonoBehaviour
     {
         jumpStart = true;
         
+    }
+
+    private void ToggleWallClimb()
+    {
+        if (currentSurface == Surface.Wall)
+        {
+            DetachFromWall();
+        }
+        else if (wallDetected)
+        {
+            AttachToWall();
+        }
+    }
+
+    private void DetachFromWall()
+    {
+        faceDir = wallHit.normal;
+        currentSurface = Surface.Air;
+    }
+
+    private void AttachToWall()
+    {
+        
+        faceDir = -wallHit.normal;
+
+        Vector3 checkPointOffset = wallCheckPoint.position - transform.position;
+        Vector3 stickPosition = wallHit.point + wallHit.normal * charCollider.radius;
+
+        float offset = (currentSurface == Surface.Ground) ? 1 : 0;
+        Vector3 position = stickPosition - checkPointOffset + new Vector3(0,offset,0);
+        float stickTime = 1;
+        rb.position = Vector3.MoveTowards(rb.position, position, stickTime);
+        rb.linearVelocity = Vector3.zero;
+
+        currentSurface = Surface.Wall;
+        //print("surface: " + currentSurface + " offset: " + offset);
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (charCollider == null) return; // safety check
+
+        // World-space origin (the correct way)
+        Vector3 worldOrigin = transform.TransformPoint(charCollider.center);
+
+        // --- Draw WORLD space visualization ---
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(worldOrigin, feetRadius);
+        Gizmos.DrawLine(worldOrigin, worldOrigin + Vector3.down * groundCheckDistance);
+        Gizmos.DrawWireSphere(worldOrigin + Vector3.down * groundCheckDistance, feetRadius);
+
+        if (wallCheckPoint == null) return;
+
+        Vector3 origin = wallCheckPoint.position;
+        Vector3 shootDir = (currentSurface == Surface.Wall) ? wallHit.normal * -1f : faceDir;
+        Vector3 endPoint = origin + shootDir * wallCheckDistance;
+
+        Gizmos.color = wallDetected ? Color.green : Color.red;
+        Gizmos.DrawWireSphere(origin, wallCheckRadius);
+        Gizmos.DrawLine(origin, endPoint);
+        Gizmos.DrawWireSphere(endPoint, wallCheckRadius);
     }
 }

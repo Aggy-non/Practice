@@ -68,6 +68,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Initiate Wall Climb",
+                    "type": "Button",
+                    "id": "809aeb7d-72c1-4b3a-944a-76102eecd0da",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -255,6 +264,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Charge Jump Cancel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "82d42e17-a216-4fff-9020-9d350f08f2cd",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Initiate Wall Climb",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

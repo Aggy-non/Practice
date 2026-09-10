@@ -17,6 +17,7 @@ public class InputManager : MonoBehaviour
     public event Action ChargeEnd;
     public event Action StartJumping;
     public event Action CancelJumping;
+    public event Action ToggleWallClimb;
 
     private void Awake()
     {
@@ -43,6 +44,11 @@ public class InputManager : MonoBehaviour
             cancelJump = true;
             //Debug.Log("Cancelled");
         }        
+    }
+
+    private void InitiateWallClimb(InputAction.CallbackContext obj)
+    {
+        ToggleWallClimb?.Invoke();
     }
     private void JumpPerformed(InputAction.CallbackContext context)
     {
@@ -105,7 +111,10 @@ public class InputManager : MonoBehaviour
         playerInputs.CharacterControls.Jump.performed += StartJumpCharge;
         playerInputs.CharacterControls.Crouch.performed += CrouchOrRollInput;
         playerInputs.CharacterControls.ChargeJumpCancel.performed += CancelChargeJump;
+        playerInputs.CharacterControls.InitiateWallClimb.performed += InitiateWallClimb;
     }
+
+    
 
     private void OnDestroy()
     {
