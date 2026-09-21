@@ -2,6 +2,7 @@ using System.Collections;
 using Unity.Cinemachine;
 using Unity.VisualScripting;
 using UnityEngine;
+using System;
 
 public class CharacterControl : MonoBehaviour
 {
@@ -26,19 +27,19 @@ public class CharacterControl : MonoBehaviour
     private Vector3 moveDir;
     private Vector3 faceDir;
 
-    [Header("Physics settings")]    
+    [Header("Physics settings")]
     [Range(0f, 100f)]
     [SerializeField] private float landDrag;
-    [Range (0f, 100f)]
+    [Range(0f, 100f)]
     [SerializeField] private float airDrag;
     [Range(0f, 100f)]
     [SerializeField] private float wallDrag;
     [Range(0f, 100f)]
     [SerializeField] private float chargeJumpAirDrag;
     public float ChargeJumpAirDrag => chargeJumpAirDrag;
-    private float gravityScale=1f;
+    private float gravityScale = 1f;
     [SerializeField] private float wallGravityScale;
-    [SerializeField] private float landGravityScale; 
+    [SerializeField] private float landGravityScale;
     [SerializeField] private float airGravityScale;
     public float AirGravityScale => airGravityScale;
 
@@ -53,6 +54,7 @@ public class CharacterControl : MonoBehaviour
     private LastJumpType lastJumpType = LastJumpType.None;
 
     [Header("Camera Settings")]
+    [SerializeField] private CameraManager cameraManager;
     [SerializeField] private Transform cameraPosition;
     [SerializeField] private Transform aimCameraPosition;
     [SerializeField] private CinemachineCamera aimCamera;
@@ -64,17 +66,21 @@ public class CharacterControl : MonoBehaviour
     [SerializeField] private int chargeMultiplier;
     public int ChargeMultiplier => chargeMultiplier;
     private StopWatch stopWatch;
+    private bool IsChargeJumpActive => currentSurface == Surface.Air && lastJumpType == LastJumpType.Charge;
 
     [Header("Wall Climb")]
     [SerializeField] Transform wallCheckPoint;
     [SerializeField] float wallCheckDistance;
     [SerializeField] float wallCheckRadius;
-    
+    [SerializeField] private float wallClearance = 0.05f;
+    [SerializeField] private float snapSharpness = 20f;
     private bool wallDetected;
-    private enum Surface { Wall, Ground, Air}
-    private Surface currentSurface= Surface.Air;
+    private enum Surface { Wall, Ground, Air }
+    private Surface currentSurface = Surface.Air;
     private bool prevGroundedState = true;
     private RaycastHit wallHit;
+
+
 
     #endregion
     private void Awake()
@@ -82,7 +88,7 @@ public class CharacterControl : MonoBehaviour
         GetAllComponents();
         AssignEvents();
     }
-    
+
     private void Start()
     {
         CursorLock();
@@ -90,10 +96,13 @@ public class CharacterControl : MonoBehaviour
     }
 
     private void Update()
-    {        
+    {
         GroundCheck();
         CalculateCurrentMoveDir();
         WallCheck();
+
+        //print(rb.linearVelocity);
+        //
     }
 
     private void FixedUpdate()
@@ -109,7 +118,7 @@ public class CharacterControl : MonoBehaviour
 
     private void CalculateCurrentMoveDir()
     {
-        if (currentSurface==Surface.Wall)
+        if (currentSurface == Surface.Wall)
         {
             moveDir = CalculateWallMoveDir();
         }
@@ -124,7 +133,7 @@ public class CharacterControl : MonoBehaviour
         Vector3 camRight = Vector3.ProjectOnPlane(cameraPosition.right, Vector3.up).normalized;
 
         //moveDir = camForward * InputDir.z + camRight * InputDir.x;
-        Vector3 normalizedReturnVector= (camForward * InputDir.y + camRight * InputDir.x).normalized;
+        Vector3 normalizedReturnVector = (camForward * InputDir.y + camRight * InputDir.x).normalized;
         if (normalizedReturnVector != Vector3.zero)
         {
             faceDir = normalizedReturnVector;
@@ -143,26 +152,39 @@ public class CharacterControl : MonoBehaviour
     }
     private void MoveCharacter()
     {
-        float multiplier;        
-        if (lastJumpType == LastJumpType.Charge)
+        float multiplier;
+        if (jumpStart && isGrounded)
         {
-            multiplier=chargeJumpMoveSpeed;
-        }
-        else
-        {
-            multiplier = 1;
-        }
-        int isJumpStarted;
-        if (jumpStart &&  isGrounded)
-        {
-            isJumpStarted = 0;
+            multiplier = 0;
             rb.linearVelocity = Vector3.zero;
         }
         else
+    {
+        multiplier = IsChargeJumpActive ? chargeJumpMoveSpeed : 1f;
+    }
+
+
+        rb.AddForce(moveDir * moveSpeed * multiplier, ForceMode.VelocityChange);
+        if (currentSurface == Surface.Wall)
         {
-            isJumpStarted = 1;
-        }       
-        rb.AddForce(moveDir * moveSpeed* multiplier* isJumpStarted, ForceMode.VelocityChange);
+            SnapToWall();
+        }
+    }
+
+    private void SnapToWall()
+    {
+        Vector3 checkPointOffset = wallCheckPoint.position - transform.position;
+        Vector3 desiredCheckPoint = wallHit.point + wallHit.normal * (charCollider.radius + wallClearance);
+        Vector3 target = desiredCheckPoint - checkPointOffset;
+
+        // only the into/out-of-wall component - leaves along-wall movement alone
+        Vector3 error = Vector3.Project(target - rb.position, wallHit.normal);
+
+        float t = 1f - Mathf.Exp(-snapSharpness * Time.fixedDeltaTime);
+        rb.position += error * t;
+
+        // kill velocity pushing into or off the wall, keep velocity along it
+        rb.linearVelocity = Vector3.ProjectOnPlane(rb.linearVelocity, wallHit.normal);
     }
 
     private void UpdatePhysicsState()
@@ -173,6 +195,7 @@ public class CharacterControl : MonoBehaviour
         {
             if (justLanded)
             {
+                DetachFromWall();
                 currentSurface = Surface.Ground; // climbed down and touched the floor
             }
             else if (!wallDetected)
@@ -198,7 +221,9 @@ public class CharacterControl : MonoBehaviour
                 break;
             case Surface.Wall:
                 gravityScale = wallGravityScale;
+                lastJumpType = LastJumpType.None;
                 ApplyDrag(wallDrag);
+                cameraManager.WallCameraActive();
                 break;
             case Surface.Air:
                 jumpStart = false;
@@ -208,14 +233,16 @@ public class CharacterControl : MonoBehaviour
                 break;
         }
 
+
         prevGroundedState = isGrounded;
     }
 
     private void ApplyDrag(float drag)
     {
+        print(drag);
         Vector3 vel = rb.linearVelocity;
         float dampFactor = Mathf.Exp(-drag * Time.fixedDeltaTime);
-        if (currentSurface==Surface.Wall)
+        if (currentSurface == Surface.Wall)
         {
             vel.y *= dampFactor;
         }
@@ -231,6 +258,8 @@ public class CharacterControl : MonoBehaviour
         Vector3 origin = transform.TransformPoint(charCollider.center);
         isGrounded = Physics.SphereCast(origin, feetRadius, Vector3.down, out RaycastHit hitInfo, groundCheckDistance, movementLayer);
 
+        //print("Was Grouned : " + wasGrounded + " Is Grounded : " + isGrounded);
+
         if (!wasGrounded && isGrounded)
         {
             lastJumpType = LastJumpType.None; // just landed
@@ -240,9 +269,10 @@ public class CharacterControl : MonoBehaviour
     private void WallCheck()
     {
         Vector3 shootDir;
-        if(currentSurface==Surface.Wall)
+        if (currentSurface == Surface.Wall)
         {
-            shootDir = wallHit.normal*-1;            
+            shootDir = wallHit.normal * -1;
+            //so that it only checks for wall in front of player and not to the side player is moving
         }
         else
         {
@@ -255,40 +285,45 @@ public class CharacterControl : MonoBehaviour
 
     private void PerformNormalJump()
     {
-       
-        if (currentSurface==Surface.Ground)
+
+        if (currentSurface == Surface.Ground)
         {
-            
+
             lastJumpType = LastJumpType.Normal;
-            CharacterJump(normalJumpForce,Vector3.up);            
+            Vector3 jumpOffset = faceDir.normalized * 0.01f;
+            CharacterJump(normalJumpForce, Vector3.up + jumpOffset);   //little bit of an offset to make sure wallcheck doesnt check directly upwards         
         }
-        else if(currentSurface==Surface.Wall)
+        else if (currentSurface == Surface.Wall)
         {
             lastJumpType = LastJumpType.Normal;
             DetachFromWall();
-            CharacterJump(wallJumpForce, wallHit.normal+new Vector3(0,1,0));
+            CharacterJump(wallJumpForce, wallHit.normal + new Vector3(0, 1, 0));
         }
         else
         {
             StopCoroutine(nameof(BufferJump));
-            bufferTimeCounter = bufferTime;            
             StartCoroutine(nameof(BufferJump));
         }
     }
 
     private void ChargeJump(float chargeJumpPower)
-    {       
+    {
+
+        if (currentSurface == Surface.Wall)
+        {
+            DetachFromWall();
+        }
         lastJumpType = LastJumpType.Charge;
-        CharacterJump((chargeJumpPower*chargeMultiplier) + normalJumpForce,aimCameraPosition.forward);
-        DetachFromWall();
-        
+        CharacterJump((chargeJumpPower * chargeMultiplier) + normalJumpForce, aimCameraPosition.forward);
+
     }
 
-    private void CharacterJump(float jumpForce,Vector3 jumpDirection)
+    private void CharacterJump(float jumpForce, Vector3 jumpDirection)
     {
         jumpStart = false;
         rb.linearVelocity = new(rb.linearVelocity.x, 0, rb.linearVelocity.z);
-        rb.AddForce(jumpDirection*jumpForce, ForceMode.Impulse);
+        rb.AddForce(jumpDirection * jumpForce, ForceMode.Impulse);
+        faceDir = Vector3.ProjectOnPlane(jumpDirection, Vector3.up).normalized;
     }
 
     private void RotatePlayer()
@@ -298,50 +333,28 @@ public class CharacterControl : MonoBehaviour
     }
 
     private IEnumerator BufferJump()
-    {    
-
-        //make a seperate timer utility class
-       while(bufferTimeCounter>0)
+    {
+        bufferTimeCounter = bufferTime;
+        while (bufferTimeCounter > 0)
         {
             if (isGrounded)
             {
                 lastJumpType = LastJumpType.Normal;
-                CharacterJump(normalJumpForce, Vector3.up);
+                Vector3 jumpOffset = faceDir.normalized * 0.01f;
+                CharacterJump(normalJumpForce, Vector3.up + jumpOffset); //little bit of an offset to make sure wallcheck doesnt check directly upwards  
                 yield break;
             }
 
-            bufferTimeCounter-= Time.deltaTime;
-            yield return null;            
+            bufferTimeCounter -= Time.deltaTime;
+            yield return null;
         }
-    }    
-    
+    }
+
     private void CustomGravity()
     {
-        rb.AddForce(Physics.gravity * gravityScale, ForceMode.Acceleration);        
-    }
-    private void GetAllComponents()
-    {        
-        charCollider = GetComponent<CapsuleCollider>();
-        rb = GetComponent<Rigidbody>();
-        inputManager = GetComponent<InputManager>(); 
-        stopWatch = GetComponent<StopWatch>();
+        rb.AddForce(Physics.gravity * gravityScale, ForceMode.Acceleration);
     }
 
-    private void CursorLock()
-    {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-    }
-
-    private void AssignEvents()
-    {
-        inputManager.GetMovementVector += value => InputDir = value;
-        inputManager.NormalJump += PerformNormalJump;
-        inputManager.StartJumping += StartJumping;
-        inputManager.CancelJumping += CancelJumping;
-        inputManager.ToggleWallClimb += ToggleWallClimb;
-        stopWatch.ChargeJumpHoldTime += ChargeJump;
-    }
 
     private void CancelJumping()
     {
@@ -351,7 +364,7 @@ public class CharacterControl : MonoBehaviour
     private void StartJumping()
     {
         jumpStart = true;
-        
+
     }
 
     private void ToggleWallClimb()
@@ -370,22 +383,21 @@ public class CharacterControl : MonoBehaviour
     {
         faceDir = wallHit.normal;
         currentSurface = Surface.Air;
+        cameraManager.MainCameraActive();
     }
 
     private void AttachToWall()
     {
-        
         faceDir = -wallHit.normal;
 
         Vector3 checkPointOffset = wallCheckPoint.position - transform.position;
         Vector3 stickPosition = wallHit.point + wallHit.normal * charCollider.radius;
 
         float offset = (currentSurface == Surface.Ground) ? 1 : 0;
-        Vector3 position = stickPosition - checkPointOffset + new Vector3(0,offset,0);
-        float stickTime = 1;
+        Vector3 position = stickPosition - checkPointOffset + new Vector3(0, offset, 0);
+        float stickTime = 1 * Time.deltaTime;
         rb.position = Vector3.MoveTowards(rb.position, position, stickTime);
         rb.linearVelocity = Vector3.zero;
-
         currentSurface = Surface.Wall;
         //print("surface: " + currentSurface + " offset: " + offset);
     }
@@ -413,5 +425,29 @@ public class CharacterControl : MonoBehaviour
         Gizmos.DrawWireSphere(origin, wallCheckRadius);
         Gizmos.DrawLine(origin, endPoint);
         Gizmos.DrawWireSphere(endPoint, wallCheckRadius);
+    }
+
+    private void GetAllComponents()
+    {
+        charCollider = GetComponent<CapsuleCollider>();
+        rb = GetComponent<Rigidbody>();
+        inputManager = GetComponent<InputManager>();
+        stopWatch = GetComponent<StopWatch>();
+    }
+
+    private void CursorLock()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
+    private void AssignEvents()
+    {
+        inputManager.GetMovementVector += value => InputDir = value;
+        inputManager.NormalJump += PerformNormalJump;
+        inputManager.StartJumping += StartJumping;
+        inputManager.CancelJumping += CancelJumping;
+        inputManager.ToggleWallClimb += ToggleWallClimb;
+        stopWatch.ChargeJumpHoldTime += ChargeJump;
     }
 }

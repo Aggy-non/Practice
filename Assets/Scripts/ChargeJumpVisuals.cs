@@ -52,10 +52,6 @@ public class ChargeJumpVisuals : MonoBehaviour
         //UpdateTargetPosition();
     }
 
-    private void FixedUpdate()
-    {
-        //SimulateArc();
-    }
 
     private void RotateDirection()
     {
@@ -64,7 +60,7 @@ public class ChargeJumpVisuals : MonoBehaviour
 
     private void SimulateArc()
     {
-        float jumpForce = chargeTime * characterControl.ChargeMultiplier + characterControl.NormalJumpForce;
+        float jumpForce = (chargeTime * characterControl.ChargeMultiplier) + characterControl.NormalJumpForce;
 
         Vector3 startVel = rb.linearVelocity; // shift the rb linear velocity to a new class to avoid errors
         startVel.y = 0f;
