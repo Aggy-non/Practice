@@ -38,6 +38,7 @@ public class CharacterControl : MonoBehaviour
     [SerializeField] private float chargeJumpAirDrag;
     public float ChargeJumpAirDrag => chargeJumpAirDrag;
     private float gravityScale = 1f;
+    private float currentDrag;
     [SerializeField] private float wallGravityScale;
     [SerializeField] private float landGravityScale;
     [SerializeField] private float airGravityScale;
@@ -239,7 +240,7 @@ public class CharacterControl : MonoBehaviour
 
     private void ApplyDrag(float drag)
     {
-        print(drag);
+        //delete this when refactoring is done
         Vector3 vel = rb.linearVelocity;
         float dampFactor = Mathf.Exp(-drag * Time.fixedDeltaTime);
         if (currentSurface == Surface.Wall)
@@ -249,6 +250,23 @@ public class CharacterControl : MonoBehaviour
         vel.x *= dampFactor;
         vel.z *= dampFactor;
         //Change Drag systems to accomodate Y axis as well
+        rb.linearVelocity = vel;
+    }
+
+    public void SetDrag(float drag)
+    {
+        currentDrag = drag;
+    }
+    private void ApplyDrag()
+    {
+        Vector3 vel = rb.linearVelocity;
+        float dampFactor = Mathf.Exp(-currentDrag * Time.fixedDeltaTime);
+        if (currentSurface == Surface.Wall)
+        {
+            vel.y *= dampFactor;
+        }
+        vel.x *= dampFactor;
+        vel.z *= dampFactor;
         rb.linearVelocity = vel;
     }
 
@@ -329,7 +347,7 @@ public class CharacterControl : MonoBehaviour
     private void RotatePlayer()
     {
         float rotateSpeed = 16f;
-        transform.forward = Vector3.Slerp(transform.forward, faceDir, rotateSpeed * Time.deltaTime);
+        transform.forward = Vector3.Slerp(transform.forward, faceDir, rotateSpeed * Time.fixedDeltaTime);
     }
 
     private IEnumerator BufferJump()
@@ -350,8 +368,13 @@ public class CharacterControl : MonoBehaviour
         }
     }
 
+    public void SetGravity(float gravity)
+    {
+        gravityScale = gravity;
+    }
     private void CustomGravity()
     {
+        //uses gravityScale for the actual gravity value  
         rb.AddForce(Physics.gravity * gravityScale, ForceMode.Acceleration);
     }
 
@@ -393,7 +416,7 @@ public class CharacterControl : MonoBehaviour
         Vector3 checkPointOffset = wallCheckPoint.position - transform.position;
         Vector3 stickPosition = wallHit.point + wallHit.normal * charCollider.radius;
 
-        float offset = (currentSurface == Surface.Ground) ? 1 : 0;
+        float offset = (currentSurface == Surface.Ground) ? 1 : 0; // to amke player move a little bit up when climbing from ground to wall
         Vector3 position = stickPosition - checkPointOffset + new Vector3(0, offset, 0);
         float stickTime = 1 * Time.deltaTime;
         rb.position = Vector3.MoveTowards(rb.position, position, stickTime);
