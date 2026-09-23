@@ -3,8 +3,8 @@ using UnityEngine;
 public class IdleState : IState
 {
     
-    private readonly CharacterControl player;
-    public IdleState(CharacterControl player)
+    private readonly StateCharacterControl player;
+    public IdleState(StateCharacterControl player)
     {
         this.player = player;
     }
@@ -12,6 +12,9 @@ public class IdleState : IState
     {
         player.SetGravity(CharacterConstants.LandGravityScale);
         player.SetDrag(CharacterConstants.LandDrag);
+        player.SetSurfaceType(StateCharacterControl.Surface.Ground);
+        player.SetMoveSpeed(CharacterConstants.MoveSpeed);
+        player.SetMoveSpeedMultiplier(CharacterConstants.MoveSpeedMultiplier);
     }
     public void Update()
     {

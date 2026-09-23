@@ -26,6 +26,7 @@ public class CharacterControl : MonoBehaviour
     private Vector3 InputDir;
     private Vector3 moveDir;
     private Vector3 faceDir;
+    private float multiplier;
 
     [Header("Physics settings")]
     [Range(0f, 100f)]
@@ -76,7 +77,7 @@ public class CharacterControl : MonoBehaviour
     [SerializeField] private float wallClearance = 0.05f;
     [SerializeField] private float snapSharpness = 20f;
     private bool wallDetected;
-    private enum Surface { Wall, Ground, Air }
+    public enum Surface { Wall, Ground, Air }
     private Surface currentSurface = Surface.Air;
     private bool prevGroundedState = true;
     private RaycastHit wallHit;
@@ -117,6 +118,7 @@ public class CharacterControl : MonoBehaviour
         //print(" surface: " + currentSurface);
     }
 
+    // noted under current move vector
     private void CalculateCurrentMoveDir()
     {
         if (currentSurface == Surface.Wall)
@@ -128,6 +130,8 @@ public class CharacterControl : MonoBehaviour
             moveDir = CalculateFloorMoveDir();
         }
     }
+
+    //noted under floor move direction
     private Vector3 CalculateFloorMoveDir()
     {
         Vector3 camForward = Vector3.ProjectOnPlane(cameraPosition.forward, Vector3.up).normalized;
@@ -142,6 +146,8 @@ public class CharacterControl : MonoBehaviour
         return normalizedReturnVector;
     }
 
+
+    //noted under wall move direction
     private Vector3 CalculateWallMoveDir()
     {
         faceDir = -wallHit.normal;
@@ -151,9 +157,10 @@ public class CharacterControl : MonoBehaviour
 
         return wallMoveDir.normalized;
     }
+
+    //noted under movement application
     private void MoveCharacter()
     {
-        float multiplier;
         if (jumpStart && isGrounded)
         {
             multiplier = 0;
@@ -172,6 +179,17 @@ public class CharacterControl : MonoBehaviour
         }
     }
 
+    //noted under movement application
+     public void SetMoveSpeed(float speed)
+    {
+        moveSpeed = speed;
+    }
+
+    public void SetMoveSpeedMultiplier(float mmultiplier)
+    {
+        multiplier = mmultiplier;
+    }
+    //noted under snap to wall
     private void SnapToWall()
     {
         Vector3 checkPointOffset = wallCheckPoint.position - transform.position;
@@ -188,6 +206,7 @@ public class CharacterControl : MonoBehaviour
         rb.linearVelocity = Vector3.ProjectOnPlane(rb.linearVelocity, wallHit.normal);
     }
 
+    //noted under physics handling
     private void UpdatePhysicsState()
     {
         bool justLanded = isGrounded && !prevGroundedState;
@@ -238,6 +257,12 @@ public class CharacterControl : MonoBehaviour
         prevGroundedState = isGrounded;
     }
 
+    public void SetSurfaceType(Surface surface)
+    {
+        currentSurface = surface;
+    }
+
+    //noted under drag application
     private void ApplyDrag(float drag)
     {
         //delete this when refactoring is done
@@ -252,11 +277,12 @@ public class CharacterControl : MonoBehaviour
         //Change Drag systems to accomodate Y axis as well
         rb.linearVelocity = vel;
     }
-
+    //noted under drag application
     public void SetDrag(float drag)
     {
         currentDrag = drag;
     }
+    //noted under drag application
     private void ApplyDrag()
     {
         Vector3 vel = rb.linearVelocity;
@@ -270,6 +296,7 @@ public class CharacterControl : MonoBehaviour
         rb.linearVelocity = vel;
     }
 
+    //noted under ground check
     private void GroundCheck()
     {
         bool wasGrounded = isGrounded;
@@ -284,6 +311,7 @@ public class CharacterControl : MonoBehaviour
         }
     }
 
+    //noted under wall check
     private void WallCheck()
     {
         Vector3 shootDir;
@@ -300,7 +328,7 @@ public class CharacterControl : MonoBehaviour
         wallDetected = Physics.SphereCast(origin, wallCheckRadius, shootDir, out wallHit, wallCheckDistance, movementLayer);
     }
 
-
+    //noted under normal jump
     private void PerformNormalJump()
     {
 
@@ -315,7 +343,8 @@ public class CharacterControl : MonoBehaviour
         {
             lastJumpType = LastJumpType.Normal;
             DetachFromWall();
-            CharacterJump(wallJumpForce, wallHit.normal + new Vector3(0, 1, 0));
+            float upwardsOffset = 1f;
+            CharacterJump(wallJumpForce, wallHit.normal + new Vector3(0, upwardsOffset, 0));
         }
         else
         {
@@ -324,6 +353,7 @@ public class CharacterControl : MonoBehaviour
         }
     }
 
+    //noted under charge jump
     private void ChargeJump(float chargeJumpPower)
     {
 
@@ -336,6 +366,7 @@ public class CharacterControl : MonoBehaviour
 
     }
 
+    //noted under character jump
     private void CharacterJump(float jumpForce, Vector3 jumpDirection)
     {
         jumpStart = false;
@@ -343,13 +374,20 @@ public class CharacterControl : MonoBehaviour
         rb.AddForce(jumpDirection * jumpForce, ForceMode.Impulse);
         faceDir = Vector3.ProjectOnPlane(jumpDirection, Vector3.up).normalized;
     }
-
+    // noted under rotate player
     private void RotatePlayer()
     {
         float rotateSpeed = 16f;
         transform.forward = Vector3.Slerp(transform.forward, faceDir, rotateSpeed * Time.fixedDeltaTime);
     }
 
+    //noted under rotate player
+    private void SetFaceDir(Vector3 direction)
+    {
+        faceDir = direction.normalized;
+    }
+
+    //noted under buffer jump
     private IEnumerator BufferJump()
     {
         bufferTimeCounter = bufferTime;
@@ -368,28 +406,35 @@ public class CharacterControl : MonoBehaviour
         }
     }
 
+    //noted under gravity application
+    //these set methods are correct just set them to public later
     public void SetGravity(float gravity)
     {
         gravityScale = gravity;
     }
+    //noted under gravity application
     private void CustomGravity()
     {
         //uses gravityScale for the actual gravity value  
         rb.AddForce(Physics.gravity * gravityScale, ForceMode.Acceleration);
     }
 
-
+    //noted under cancel jump
     private void CancelJumping()
     {
         jumpStart = false;
     }
 
+
+    //noted under start jump
     private void StartJumping()
     {
         jumpStart = true;
 
     }
 
+
+    //noted under toggle wall climb
     private void ToggleWallClimb()
     {
         if (currentSurface == Surface.Wall)
@@ -402,6 +447,7 @@ public class CharacterControl : MonoBehaviour
         }
     }
 
+    //noted under detach from wall
     private void DetachFromWall()
     {
         faceDir = wallHit.normal;
@@ -409,6 +455,7 @@ public class CharacterControl : MonoBehaviour
         cameraManager.MainCameraActive();
     }
 
+    //noted under attach to wall 
     private void AttachToWall()
     {
         faceDir = -wallHit.normal;

@@ -1,8 +1,11 @@
 public static class CharacterConstants
 {
     public const float LandGravityScale = 1f;
-    public const float LandDrag = 0f;
+    public const float LandDrag = 21.5f;
+    public const float MoveSpeed = 3.5f;
+    public const float MoveSpeedMultiplier = 1;
 }
+
 
 /*
   // ---------- Ground check ----------
@@ -11,7 +14,6 @@ public static class CharacterConstants
 
     // ---------- Movement ----------
     public const float MaxSpeed = 0f;               
-    public const float MoveSpeed = 0f;              
     public const float ChargeJumpMoveSpeed = 0f;    
 
     // ---------- Physics / drag / gravity ---------

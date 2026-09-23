@@ -12,7 +12,7 @@ public class CharacterStateMachine
     public event Action<IState> OnStateChanged;
 
 
-    public CharacterStateMachine(CharacterControl player)
+    public CharacterStateMachine(StateCharacterControl player)
     {
         //this.walkState = new WalkState(player);
     }
