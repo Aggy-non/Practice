@@ -11,6 +11,7 @@ public class StateCharacterControl : MonoBehaviour
     private InputManager inputManager;
     private CapsuleCollider charCollider;
     private Rigidbody rb;
+    public Rigidbody Rb => rb;
 
     [Header("Ground check settings")]
     [SerializeField] private float feetRadius;
@@ -26,6 +27,7 @@ public class StateCharacterControl : MonoBehaviour
     private Vector3 InputDir;
     private Vector3 moveDir;
     private Vector3 faceDir;
+    public Vector3 FaceDir => faceDir;
     private float multiplier;
 
     [Header("Physics settings")]
@@ -85,19 +87,24 @@ public class StateCharacterControl : MonoBehaviour
     //State Machine
     private CharacterStateMachine stateMachine;
     public CharacterStateMachine StateMachine => stateMachine;
+    private IState currentState;
+    public IState CurrentState => currentState;
 
 
     #endregion
     private void Awake()
     {
         GetAllComponents();
-        AssignEvents();
+        
+        stateMachine = new CharacterStateMachine(this,inputManager);
     }
 
     private void Start()
     {
+        AssignEvents();
         CursorLock();
         //rb.maxLinearVelocity = maxSpeed;
+        stateMachine.Initialize(stateMachine.idleState);
     }
 
     private void Update()
@@ -105,7 +112,7 @@ public class StateCharacterControl : MonoBehaviour
         GroundCheck();
         CalculateCurrentMoveDir();
         WallCheck();
-
+        stateMachine.Exectue();
         //print(rb.linearVelocity);
         //
     }
@@ -117,6 +124,7 @@ public class StateCharacterControl : MonoBehaviour
         UpdatePhysicsState();
         MoveCharacter();
         RotatePlayer();
+        ApplyDrag();
         //print("wallcheck: " + isWallClimbing + " groundcheck: " + isGrounded);
         //print(" surface: " + currentSurface);
     }
@@ -144,7 +152,8 @@ public class StateCharacterControl : MonoBehaviour
         Vector3 normalizedReturnVector = (camForward * InputDir.y + camRight * InputDir.x).normalized;
         if (normalizedReturnVector != Vector3.zero)
         {
-            faceDir = normalizedReturnVector;
+            //faceDir = normalizedReturnVector;
+            SetFaceDir(normalizedReturnVector);
         }
         return normalizedReturnVector;
     }
@@ -153,7 +162,8 @@ public class StateCharacterControl : MonoBehaviour
     //noted under wall move direction
     private Vector3 CalculateWallMoveDir()
     {
-        faceDir = -wallHit.normal;
+        //faceDir = -wallHit.normal;
+        SetFaceDir(-wallHit.normal);
         Vector3 wallRight = Vector3.Cross(Vector3.up, faceDir).normalized;
         Vector3 wallForward = Vector3.Cross(faceDir, wallRight).normalized;
         Vector3 wallMoveDir = wallRight * InputDir.x + wallForward * InputDir.y;
@@ -375,7 +385,8 @@ public class StateCharacterControl : MonoBehaviour
         jumpStart = false;
         rb.linearVelocity = new(rb.linearVelocity.x, 0, rb.linearVelocity.z);
         rb.AddForce(jumpDirection * jumpForce, ForceMode.Impulse);
-        faceDir = Vector3.ProjectOnPlane(jumpDirection, Vector3.up).normalized;
+        //faceDir = Vector3.ProjectOnPlane(jumpDirection, Vector3.up).normalized;
+        SetFaceDir(Vector3.ProjectOnPlane(jumpDirection, Vector3.up).normalized);
     }
     // noted under rotate player
     private void RotatePlayer()
@@ -453,7 +464,8 @@ public class StateCharacterControl : MonoBehaviour
     //noted under detach from wall
     private void DetachFromWall()
     {
-        faceDir = wallHit.normal;
+        //faceDir = wallHit.normal;
+        SetFaceDir(wallHit.normal);
         currentSurface = Surface.Air;
         cameraManager.MainCameraActive();
     }
@@ -461,7 +473,8 @@ public class StateCharacterControl : MonoBehaviour
     //noted under attach to wall 
     private void AttachToWall()
     {
-        faceDir = -wallHit.normal;
+        //faceDir = -wallHit.normal;
+        SetFaceDir(-wallHit.normal);
 
         Vector3 checkPointOffset = wallCheckPoint.position - transform.position;
         Vector3 stickPosition = wallHit.point + wallHit.normal * charCollider.radius;
@@ -522,5 +535,6 @@ public class StateCharacterControl : MonoBehaviour
         inputManager.CancelJumping += CancelJumping;
         inputManager.ToggleWallClimb += ToggleWallClimb;
         stopWatch.ChargeJumpHoldTime += ChargeJump;
+        stateMachine.OnStateChanged += value => currentState = value;
     }
 }

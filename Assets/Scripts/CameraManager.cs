@@ -11,7 +11,8 @@ public class CameraManager : MonoBehaviour
     //[SerializeField] private bool isAim=false;
 
     private InputManager inputManager;
-    private CharacterControl characterControl;
+    //private CharacterControl characterControl;
+    private StateCharacterControl characterControl;
     private void Start()
     {
         inputManager = GetComponent<InputManager>();

@@ -4,7 +4,8 @@ using UnityEngine;
 public class StopWatch : MonoBehaviour
 {
     private InputManager inputManager;
-    private CharacterControl characterControl;
+    //private CharacterControl characterControl;
+    private StateCharacterControl characterControl;
 
     public float stopwatchTime { get; private set; }
 
@@ -14,7 +15,8 @@ public class StopWatch : MonoBehaviour
     void Start()
     {
         inputManager = GetComponent<InputManager>();
-        characterControl = GetComponent<CharacterControl>();
+        //characterControl = GetComponent<CharacterControl>();
+        characterControl = GetComponent<StateCharacterControl>();
         inputManager.ChargeStart += StartStopwatch;
         inputManager.ChargeEnd += FinishStopWatch;
         inputManager.CancelJumping += CancelStopWatch;

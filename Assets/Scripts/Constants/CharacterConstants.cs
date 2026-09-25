@@ -2,8 +2,11 @@ public static class CharacterConstants
 {
     public const float LandGravityScale = 1f;
     public const float LandDrag = 21.5f;
-    public const float MoveSpeed = 3.5f;
-    public const float MoveSpeedMultiplier = 1;
+    public const float FloorMoveSpeed = 3.5f;
+    public const float DefaultMoveSpeedMultiplier = 1;
+
+
+    public const float StartJumpMultiplier = 0;
 }
 
 

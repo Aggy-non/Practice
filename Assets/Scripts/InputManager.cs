@@ -10,6 +10,8 @@ public class InputManager : MonoBehaviour
     private bool cancelJump=false;
     private Vector3 movementVector;
     private PlayerInputs playerInputs;
+    private StateCharacterControl characterControl;
+    private IState currentState;
 
     public event Action<Vector3> GetMovementVector;
     public event Action NormalJump;
@@ -24,15 +26,22 @@ public class InputManager : MonoBehaviour
         playerInputs = new PlayerInputs();
         InputLinking();
     }
+    private void Start()
+    {
+        characterControl = GetComponent<StateCharacterControl>();
+    }
     private void Update()
     {
-        // just log it for now we'll make it send event args later
         ReturnMovementVector();
     }
 
     private void JumpStarted(InputAction.CallbackContext context)
     {
         StartJumping?.Invoke();
+        if(characterControl.StateMachine.CurrentState == characterControl.StateMachine.idleState|| characterControl.StateMachine.CurrentState == characterControl.StateMachine.idleState)
+        {
+            characterControl.StateMachine.TransitionToState(characterControl.StateMachine.startJumpState);
+        }
     }
 
     private void CancelChargeJump(InputAction.CallbackContext obj)

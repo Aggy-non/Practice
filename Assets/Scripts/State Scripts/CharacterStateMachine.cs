@@ -8,13 +8,18 @@ public class CharacterStateMachine
     public IState CurrentState { get; private set; }
 
     //states
+    public IdleState idleState;
+    public FloorMoveState floorMoveState;
+    public StartJumpStateFloor startJumpState;
 
     public event Action<IState> OnStateChanged;
 
 
-    public CharacterStateMachine(StateCharacterControl player)
+    public CharacterStateMachine(StateCharacterControl player,InputManager input)
     {
-        //this.walkState = new WalkState(player);
+        this.idleState = new IdleState(player,input);
+        this.floorMoveState = new FloorMoveState(player,input);
+        Debug.Log("state machine online");
     }
     public void Initialize(IState state)
     {
@@ -28,7 +33,11 @@ public class CharacterStateMachine
     {
         if (CurrentState != null)
         {
-            CurrentState.Update();
+            CurrentState.Execute();
+        }
+        else
+        {
+            Debug.LogWarning("CurrentState is null. Cannot execute state logic.");
         }
     }
 

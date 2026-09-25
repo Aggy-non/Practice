@@ -9,7 +9,8 @@ public class ChargeJumpVisuals : MonoBehaviour
 
     private InputManager inputManager;
     private StopWatch stopWatch;
-    private CharacterControl characterControl;
+    //private CharacterControl characterControl;
+    private StateCharacterControl characterControl;
     private Rigidbody rb;
     private LineRenderer lr;
 
@@ -135,7 +136,8 @@ public class ChargeJumpVisuals : MonoBehaviour
         stopWatch = GetComponent<StopWatch>();
         lr = GetComponent<LineRenderer>();
         inputManager = GetComponent<InputManager>();
-        characterControl = GetComponent<CharacterControl>();
+        //characterControl = GetComponent<CharacterControl>();
+        characterControl = GetComponent<StateCharacterControl>();
         rb = GetComponent<Rigidbody>();
     }
 

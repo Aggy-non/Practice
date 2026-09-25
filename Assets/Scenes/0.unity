@@ -3261,6 +3261,7 @@ GameObject:
   - component: {fileID: 1689519841}
   - component: {fileID: 1689519849}
   - component: {fileID: 1689519846}
+  - component: {fileID: 1689519856}
   - component: {fileID: 1689519850}
   - component: {fileID: 1689519852}
   - component: {fileID: 1689519853}
@@ -3587,6 +3588,47 @@ MonoBehaviour:
   aimCamera: {fileID: 797884912}
   mainCamera: {fileID: 2136653355}
   wallCamera: {fileID: 469717168}
+--- !u!114 &1689519856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1689519840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4fa86310df2e60478e14751b50c1054, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StateCharacterControl
+  feetRadius: 0.49
+  groundCheckDistance: 0.7
+  movementLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  maxSpeed: 30
+  moveSpeed: 3.5
+  chargeJumpMoveSpeed: 0.2
+  landDrag: 21.5
+  airDrag: 11.2
+  wallDrag: 27.9
+  chargeJumpAirDrag: 1
+  wallGravityScale: 0
+  landGravityScale: 1
+  airGravityScale: 7.5
+  normalJumpForce: 22
+  wallJumpForce: 32
+  bufferTime: 0.15
+  cameraManager: {fileID: 1689519855}
+  cameraPosition: {fileID: 2136653356}
+  aimCameraPosition: {fileID: 797884913}
+  aimCamera: {fileID: 797884912}
+  mainCamera: {fileID: 92689282}
+  chargeMultiplier: 15
+  wallCheckPoint: {fileID: 1086413091}
+  wallCheckDistance: 2.24
+  wallCheckRadius: 0.45
+  wallClearance: 0.05
+  snapSharpness: 20
 --- !u!1 &1786947701
 GameObject:
   m_ObjectHideFlags: 0
