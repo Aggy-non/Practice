@@ -37,11 +37,7 @@ public class InputManager : MonoBehaviour
 
     private void JumpStarted(InputAction.CallbackContext context)
     {
-        StartJumping?.Invoke();
-        if(characterControl.StateMachine.CurrentState == characterControl.StateMachine.idleState|| characterControl.StateMachine.CurrentState == characterControl.StateMachine.idleState)
-        {
-            characterControl.StateMachine.TransitionToState(characterControl.StateMachine.startJumpState);
-        }
+        StartJumping?.Invoke();        
     }
 
     private void CancelChargeJump(InputAction.CallbackContext obj)

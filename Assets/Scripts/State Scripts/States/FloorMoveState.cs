@@ -14,7 +14,6 @@ public class FloorMoveState : IState
         player.SetGravity(CharacterConstants.LandGravityScale);
         player.SetDrag(CharacterConstants.LandDrag);
         player.SetSurfaceType(StateCharacterControl.Surface.Ground);
-        player.SetMoveSpeed(CharacterConstants.FloorMoveSpeed);
         player.SetMoveSpeedMultiplier(CharacterConstants.DefaultMoveSpeedMultiplier);
         Debug.Log("floorState");
     }

@@ -14,16 +14,10 @@ public class StateCharacterControl : MonoBehaviour
     public Rigidbody Rb => rb;
 
     [Header("Ground check settings")]
-    [SerializeField] private float feetRadius;
-    [SerializeField] private float groundCheckDistance;
     [SerializeField] private LayerMask movementLayer;
     private bool isGrounded = true;
 
     [Header("Movement settings")]
-    [SerializeField] private float maxSpeed;
-    [SerializeField] private float moveSpeed;
-    [Range(0f, 1f)]
-    [SerializeField] private float chargeJumpMoveSpeed;
     private Vector3 InputDir;
     private Vector3 moveDir;
     private Vector3 faceDir;
@@ -53,7 +47,7 @@ public class StateCharacterControl : MonoBehaviour
     public float NormalJumpForce => normalJumpForce;
     [SerializeField] private float bufferTime;
     private float bufferTimeCounter;
-    private bool jumpStart;
+    //private bool jumpStart;
     private enum LastJumpType { None, Normal, Charge }
     private LastJumpType lastJumpType = LastJumpType.None;
 
@@ -174,18 +168,18 @@ public class StateCharacterControl : MonoBehaviour
     //noted under movement application
     private void MoveCharacter()
     {
-        if (jumpStart && isGrounded)
-        {
-            multiplier = 0;
-            rb.linearVelocity = Vector3.zero;
-        }
-        else
-        {
-            multiplier = IsChargeJumpActive ? chargeJumpMoveSpeed : 1f;
-        }
+    //    if (jumpStart && isGrounded)
+    //    {
+    //        multiplier = 0;
+    //        rb.linearVelocity = Vector3.zero;
+    //    }
+    //    else
+    //    {
+    //        multiplier = IsChargeJumpActive ? chargeJumpMoveSpeed : 1f;
+    //    }
 
 
-        rb.AddForce(moveDir * moveSpeed * multiplier, ForceMode.VelocityChange);
+        rb.AddForce(moveDir * CharacterConstants.MoveSpeed * multiplier, ForceMode.VelocityChange);
         if (currentSurface == Surface.Wall)
         {
             SnapToWall();
@@ -193,10 +187,10 @@ public class StateCharacterControl : MonoBehaviour
     }
 
     //noted under movement application
-    public void SetMoveSpeed(float speed)
-    {
-        moveSpeed = speed;
-    }
+    //public void SetMoveSpeed(float speed)
+    //{
+    //    moveSpeed = speed;
+    //}
 
     public void SetMoveSpeedMultiplier(float mmultiplier)
     {
@@ -259,7 +253,7 @@ public class StateCharacterControl : MonoBehaviour
                 cameraManager.WallCameraActive();
                 break;
             case Surface.Air:
-                jumpStart = false;
+                //jumpStart = false;
                 gravityScale = airGravityScale;
                 float drag = (lastJumpType == LastJumpType.Charge) ? chargeJumpAirDrag : airDrag;
                 ApplyDrag(drag);
@@ -314,7 +308,7 @@ public class StateCharacterControl : MonoBehaviour
     {
         bool wasGrounded = isGrounded;
         Vector3 origin = transform.TransformPoint(charCollider.center);
-        isGrounded = Physics.SphereCast(origin, feetRadius, Vector3.down, out RaycastHit hitInfo, groundCheckDistance, movementLayer);
+        isGrounded = Physics.SphereCast(origin, CharacterConstants.FeetRadius, Vector3.down, out RaycastHit hitInfo, CharacterConstants.GroundCheckDistance, movementLayer);
 
         //print("Was Grouned : " + wasGrounded + " Is Grounded : " + isGrounded);
 
@@ -382,7 +376,7 @@ public class StateCharacterControl : MonoBehaviour
     //noted under character jump
     private void CharacterJump(float jumpForce, Vector3 jumpDirection)
     {
-        jumpStart = false;
+        //jumpStart = false;
         rb.linearVelocity = new(rb.linearVelocity.x, 0, rb.linearVelocity.z);
         rb.AddForce(jumpDirection * jumpForce, ForceMode.Impulse);
         //faceDir = Vector3.ProjectOnPlane(jumpDirection, Vector3.up).normalized;
@@ -436,15 +430,22 @@ public class StateCharacterControl : MonoBehaviour
     //noted under cancel jump
     private void CancelJumping()
     {
-        jumpStart = false;
+        //jumpStart = false;
+        //switch to previous state if jump is cancelled
     }
 
 
     //noted under start jump
     private void StartJumping()
     {
-        jumpStart = true;
-
+        if (currentSurface == Surface.Ground || currentSurface == Surface.Wall)
+        {
+            stateMachine.TransitionToState(stateMachine.startJumpState);
+        }
+        else
+        {
+            return;
+        }
     }
 
 
@@ -497,9 +498,9 @@ public class StateCharacterControl : MonoBehaviour
 
         // --- Draw WORLD space visualization ---
         Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(worldOrigin, feetRadius);
-        Gizmos.DrawLine(worldOrigin, worldOrigin + Vector3.down * groundCheckDistance);
-        Gizmos.DrawWireSphere(worldOrigin + Vector3.down * groundCheckDistance, feetRadius);
+        Gizmos.DrawWireSphere(worldOrigin, CharacterConstants.FeetRadius);
+        Gizmos.DrawLine(worldOrigin, worldOrigin + Vector3.down * CharacterConstants.GroundCheckDistance);
+        Gizmos.DrawWireSphere(worldOrigin + Vector3.down * CharacterConstants.GroundCheckDistance, CharacterConstants.FeetRadius);
 
         if (wallCheckPoint == null) return;
 

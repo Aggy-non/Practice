@@ -10,7 +10,8 @@ public class CharacterStateMachine
     //states
     public IdleState idleState;
     public FloorMoveState floorMoveState;
-    public StartJumpStateFloor startJumpState;
+    public StartJumpState startJumpState;
+    public DefaultAirState airState;
 
     public event Action<IState> OnStateChanged;
 
@@ -19,6 +20,8 @@ public class CharacterStateMachine
     {
         this.idleState = new IdleState(player,input);
         this.floorMoveState = new FloorMoveState(player,input);
+        this.startJumpState = new StartJumpState(player);
+        this.airState = new DefaultAirState(player);
         Debug.Log("state machine online");
     }
     public void Initialize(IState state)

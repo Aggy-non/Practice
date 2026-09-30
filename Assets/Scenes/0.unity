@@ -206,8 +206,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 92689280}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.12218327, y: 0.0000000020835436, z: -2.5649596e-10, w: 0.9925076}
-  m_LocalPosition: {x: 24.71, y: 2.4, z: 23.37}
+  m_LocalRotation: {x: 0.08578662, y: -0.000858027, z: 0.00007387962, w: 0.9963132}
+  m_LocalPosition: {x: 24.709972, y: 3.618861, z: 24.795052}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3363,7 +3363,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1689519840}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d3d1e29ff4d02144f81d27d3920e1cb9, type: 3}
   m_Name: 
@@ -3600,14 +3600,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4fa86310df2e60478e14751b50c1054, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StateCharacterControl
-  feetRadius: 0.49
-  groundCheckDistance: 0.7
   movementLayer:
     serializedVersion: 2
     m_Bits: 8
-  maxSpeed: 30
-  moveSpeed: 3.5
-  chargeJumpMoveSpeed: 0.2
   landDrag: 21.5
   airDrag: 11.2
   wallDrag: 27.9
@@ -4573,13 +4568,13 @@ MonoBehaviour:
   Orbits:
     Top:
       Radius: 1
-      Height: 5.86
+      Height: 4.95
     Center:
       Radius: 4.59
       Height: 1.32
     Bottom:
       Radius: 2.46
-      Height: -2.24
+      Height: -1.42
     SplineCurvature: 1
   RecenteringTarget: 0
   HorizontalAxis:
@@ -4663,7 +4658,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2136653350}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.08578662, y: -0.0008581048, z: 0.00007388632, w: 0.9963132}
+  m_LocalRotation: {x: 0.085786596, y: -0.00085802685, z: 0.000073879586, w: 0.9963132}
   m_LocalPosition: {x: 24.71, y: 3.52, z: 24.78}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0

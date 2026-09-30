@@ -1,38 +1,42 @@
 public static class CharacterConstants
 {
-    public const float LandGravityScale = 1f;
+    // ---------- Ground check ----------
+    public const float FeetRadius = 0.49f;
+    public const float GroundCheckDistance = 0.7f;
+
+    // ---------- Movement ----------
+    public const float MaxSpeed = 30f;
+    public const float ChargeJumpMoveSpeed = 0.2f;
+    public const float MoveSpeed = 3.5f;
+
+    // ---------- Drag ---------
     public const float LandDrag = 21.5f;
-    public const float FloorMoveSpeed = 3.5f;
+    public const float AirDrag = 11.2f;
+    public const float WallDrag = 27.9f;
+    public const float ChargeJumpAirDrag = 1f;
+    public const float StartJumpDrag = 100;
+
+    // ---------- Gravity ---------
+    public const float LandGravityScale = 1f;
+    public const float AirGravityScale = 7.5f;
+    public const float WallGravityScale = 0f; //yes its supposed to be 0
+
+    // ---------- Move speed multiplier ----------
     public const float DefaultMoveSpeedMultiplier = 1;
-
-
     public const float StartJumpMultiplier = 0;
+
+    // ---------- Jump ----------
+    public const float NormalJumpForce = 22f;
+    public const float WallJumpForce = 32f;
+    public const float BufferTime = 0.15f;
+    public const int ChargeMultiplier = 15;
 }
 
 
-/*
-  // ---------- Ground check ----------
-    public const float FeetRadius = 0f;             
-    public const float GroundCheckDistance = 0f;    
+/*      
+         
 
-    // ---------- Movement ----------
-    public const float MaxSpeed = 0f;               
-    public const float ChargeJumpMoveSpeed = 0f;    
-
-    // ---------- Physics / drag / gravity ---------
-                 
-    public const float AirDrag = 0f;                
-    public const float WallDrag = 0f;               
-    public const float ChargeJumpAirDrag = 0f;      
-          
-    public const float AirGravityScale = 0f;        
-    public const float WallGravityScale = 0f;       
-
-    // ---------- Jump ----------
-    public const float NormalJumpForce = 0f;        
-    public const float WallJumpForce = 0f;          
-    public const float BufferTime = 0f;             
-    public const int ChargeMultiplier = 0;          
+              
 
     // ---------- Wall climb ----------
     public const float WallCheckDistance = 0f;      

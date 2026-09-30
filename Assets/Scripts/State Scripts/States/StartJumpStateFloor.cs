@@ -1,26 +1,23 @@
 using UnityEngine;
 
-public class StartJumpStateFloor : IState    
+public class StartJumpState : IState    
 {
     private readonly StateCharacterControl player;
-    public StartJumpStateFloor(StateCharacterControl player)
+    public StartJumpState(StateCharacterControl player)
     {
         this.player = player;
        
     }
     public void Enter()
     {
-        player.SetGravity(CharacterConstants.LandGravityScale);
-        player.SetDrag(CharacterConstants.LandDrag);
-        player.SetSurfaceType(StateCharacterControl.Surface.Ground);
-        player.SetMoveSpeed(CharacterConstants.FloorMoveSpeed);
         player.SetMoveSpeedMultiplier(CharacterConstants.StartJumpMultiplier);
-        //also freeze rotation here
+        player.SetDrag(CharacterConstants.StartJumpDrag);
         Debug.Log("floorState");
     }
     public void Execute()
     {
         //write transition code here
+
     }
     public void Exit()
     {
