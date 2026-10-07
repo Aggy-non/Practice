@@ -336,7 +336,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &134854582
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -349,6 +349,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7ece02c4a19c8349896964aaa67d389, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TuningPanel
+  airDrag: 11.2
+  airSpeedMultiplier: 0.4
+  normalJumpForce: 22
 --- !u!4 &134854583
 Transform:
   m_ObjectHideFlags: 0
@@ -3603,27 +3606,13 @@ MonoBehaviour:
   movementLayer:
     serializedVersion: 2
     m_Bits: 8
-  landDrag: 21.5
-  airDrag: 11.2
-  wallDrag: 27.9
-  chargeJumpAirDrag: 1
-  wallGravityScale: 0
-  landGravityScale: 1
-  airGravityScale: 7.5
-  normalJumpForce: 22
   wallJumpForce: 32
-  bufferTime: 0.15
   cameraManager: {fileID: 1689519855}
   cameraPosition: {fileID: 2136653356}
   aimCameraPosition: {fileID: 797884913}
   aimCamera: {fileID: 797884912}
   mainCamera: {fileID: 92689282}
-  chargeMultiplier: 15
   wallCheckPoint: {fileID: 1086413091}
-  wallCheckDistance: 2.24
-  wallCheckRadius: 0.45
-  wallClearance: 0.05
-  snapSharpness: 20
 --- !u!1 &1786947701
 GameObject:
   m_ObjectHideFlags: 0

@@ -12,6 +12,9 @@ public class CharacterStateMachine
     public FloorMoveState floorMoveState;
     public StartJumpState startJumpState;
     public DefaultAirState airState;
+    public ChargeState chargeState;
+    public WallState wallState;
+    public WallMoveState wallMoveState;
 
     public event Action<IState> OnStateChanged;
 
@@ -22,6 +25,9 @@ public class CharacterStateMachine
         this.floorMoveState = new FloorMoveState(player,input);
         this.startJumpState = new StartJumpState(player);
         this.airState = new DefaultAirState(player);
+        this.chargeState = new ChargeState(player);
+        this.wallState = new WallState(player);
+        this.wallMoveState = new WallMoveState(player);
         Debug.Log("state machine online");
     }
     public void Initialize(IState state)
@@ -46,10 +52,11 @@ public class CharacterStateMachine
 
     public void TransitionToState(IState newState)
     {
+        //Debug.Log("Transitioned to state: " + newState.GetType().Name);
         CurrentState.Exit();
         CurrentState = newState;
         newState.Enter();
-
+        
         OnStateChanged?.Invoke(newState);
     }
 }

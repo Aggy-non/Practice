@@ -61,7 +61,7 @@ public class ChargeJumpVisuals : MonoBehaviour
 
     private void SimulateArc()
     {
-        float jumpForce = (chargeTime * characterControl.ChargeMultiplier) + characterControl.NormalJumpForce;
+        float jumpForce = (chargeTime * CharacterConstants.ChargeMultiplier) + CharacterConstants.NormalJumpForce;
 
         Vector3 startVel = rb.linearVelocity; // shift the rb linear velocity to a new class to avoid errors
         startVel.y = 0f;
@@ -69,8 +69,8 @@ public class ChargeJumpVisuals : MonoBehaviour
         Vector3 simVel = startVel + (currentDirection * jumpForce) / rb.mass;
         Vector3 simPos = startPoint.position;
 
-        float dragDecay = Mathf.Exp(-characterControl.ChargeJumpAirDrag * Time.fixedDeltaTime);
-        float gravityAccel = Physics.gravity.y * characterControl.AirGravityScale;
+        float dragDecay = Mathf.Exp(CharacterConstants.ChargeJumpAirDrag * Time.fixedDeltaTime);
+        float gravityAccel = Physics.gravity.y * CharacterConstants.AirGravityScale;
 
         int pointCount = 0;
         arcPoints[pointCount++] = simPos;

@@ -75,7 +75,8 @@ public class InputManager : MonoBehaviour
             if (cancelJump)
             {
                 cancelJump = false;
-                return;                
+                return; 
+                // this is so that player doesnt jump after releasing the jump key they pressed when they started the charge jump
             }
             else
             {

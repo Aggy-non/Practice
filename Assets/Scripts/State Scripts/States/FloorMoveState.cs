@@ -11,17 +11,19 @@ public class FloorMoveState : IState
     }
     public void Enter()
     {
-        player.SetGravity(CharacterConstants.LandGravityScale);
-        player.SetDrag(CharacterConstants.LandDrag);
         player.SetSurfaceType(StateCharacterControl.Surface.Ground);
-        player.SetMoveSpeedMultiplier(CharacterConstants.DefaultMoveSpeedMultiplier);
-        Debug.Log("floorState");
+        Debug.Log("floor Move State");
     }
     public void Execute()
     {
         if (player.Rb.linearVelocity== Vector3.zero)
         {
             player.StateMachine.TransitionToState(player.StateMachine.idleState);
+        }
+
+        if (!player.IsGrounded)
+        {
+            player.StateMachine.TransitionToState(player.StateMachine.airState);
         }
     }
     public void Exit()

@@ -10,17 +10,22 @@ public class StartJumpState : IState
     }
     public void Enter()
     {
-        player.SetMoveSpeedMultiplier(CharacterConstants.StartJumpMultiplier);
-        player.SetDrag(CharacterConstants.StartJumpDrag);
-        Debug.Log("floorState");
+        player.SetGravity(CharacterConstants.AirGravityScale);
+        player.SetMoveSpeedMultiplier(CharacterConstants.StartJumpMultiplier); // will make movement input 0
+        player.SetDrag(CharacterConstants.StartJumpDrag); // will make movement close to 0
+        Debug.Log("Start Jump State");
     }
     public void Execute()
     {
-        //write transition code here
-
+        //if (!player.IsGrounded)
+        //{
+        //    player.StateMachine.TransitionToState(player.StateMachine.airState);
+        //}
     }
     public void Exit()
     {
 
     }
 }
+
+ 

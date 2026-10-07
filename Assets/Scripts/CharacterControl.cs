@@ -87,8 +87,8 @@ public class CharacterControl : MonoBehaviour
     #endregion
     private void Awake()
     {
-        GetAllComponents();
-        AssignEvents();
+        //GetAllComponents();
+        //AssignEvents();
     }
 
     private void Start()

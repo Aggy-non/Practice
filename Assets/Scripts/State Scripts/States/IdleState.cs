@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class IdleState : IState
@@ -20,10 +21,19 @@ public class IdleState : IState
     }
     public void Execute()
     {
-        if(player.Rb.linearVelocity != Vector3.zero)
+        if(Mathf.Abs(player.Rb.linearVelocity.x)>0.1f || Mathf.Abs(player.Rb.linearVelocity.z)> 0.1f)
         {
+        //    Debug.Log(Mathf.Abs(player.Rb.linearVelocity.z));
+        //    Debug.Log(Mathf.Abs(player.Rb.linearVelocity.x));
             player.StateMachine.TransitionToState(player.StateMachine.floorMoveState);
         }
+
+        //transition to air state
+        if (!player.IsGrounded)
+        {
+            player.StateMachine.TransitionToState(player.StateMachine.airState);
+        }
+
     }
     public void Exit()
     {

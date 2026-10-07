@@ -13,12 +13,15 @@ public class DefaultAirState : IState
         player.SetGravity(CharacterConstants.AirGravityScale);
         player.SetDrag(CharacterConstants.AirDrag);
         player.SetSurfaceType(StateCharacterControl.Surface.Air);
-        player.SetMoveSpeedMultiplier(CharacterConstants.DefaultMoveSpeedMultiplier);
+        player.SetMoveSpeedMultiplier(CharacterConstants.AirSpeedMultiplier);
         Debug.Log("default air state");
     }
     public void Execute()
     {
-        
+        if(player.IsGrounded)
+        {
+            player.StateMachine.TransitionToState(player.StateMachine.idleState);
+        }
     }
     public void Exit()
     {

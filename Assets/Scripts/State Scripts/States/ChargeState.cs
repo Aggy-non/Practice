@@ -1,0 +1,28 @@
+using UnityEngine;
+
+public class ChargeState : IState
+{
+    private readonly StateCharacterControl player;
+    public ChargeState(StateCharacterControl player)
+    {
+        this.player = player;
+
+    }
+    public void Enter()
+    {
+        player.SetDrag(CharacterConstants.ChargeJumpAirDrag);
+        player.SetGravity(CharacterConstants.AirGravityScale);
+        player.SetSurfaceType(StateCharacterControl.Surface.Air);
+        player.SetMoveSpeedMultiplier(CharacterConstants.DefaultMoveSpeedMultiplier);
+        Debug.Log("Charge state");
+    }
+    public void Execute()
+    {
+
+    }
+    public void Exit()
+    {
+
+    }
+}
+

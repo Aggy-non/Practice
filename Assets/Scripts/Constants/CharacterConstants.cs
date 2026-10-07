@@ -11,7 +11,7 @@ public static class CharacterConstants
 
     // ---------- Drag ---------
     public const float LandDrag = 21.5f;
-    public const float AirDrag = 11.2f;
+    public static float AirDrag = 3.6f; //under tuning
     public const float WallDrag = 27.9f;
     public const float ChargeJumpAirDrag = 1f;
     public const float StartJumpDrag = 100;
@@ -24,23 +24,17 @@ public static class CharacterConstants
     // ---------- Move speed multiplier ----------
     public const float DefaultMoveSpeedMultiplier = 1;
     public const float StartJumpMultiplier = 0;
+    public static float AirSpeedMultiplier = 0.25f;//under tuning
 
     // ---------- Jump ----------
-    public const float NormalJumpForce = 22f;
+    public static float NormalJumpForce = 22f;//under tuning
     public const float WallJumpForce = 32f;
     public const float BufferTime = 0.15f;
     public const int ChargeMultiplier = 15;
-}
-
-
-/*      
-         
-
-              
 
     // ---------- Wall climb ----------
-    public const float WallCheckDistance = 0f;      
-    public const float WallCheckRadius = 0f;        
-    public const float WallClearance = 0.05f;       
-    public const float SnapSharpness = 20f;   
- */
+    public const float WallCheckDistance = 2.24f;
+    public const float WallCheckRadius = 0.45f;
+    public const float WallClearance = 0.05f;
+    public const float SnapSharpness = 20f;
+}
