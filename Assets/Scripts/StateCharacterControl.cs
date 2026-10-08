@@ -183,28 +183,11 @@ public class StateCharacterControl : MonoBehaviour
         rb.linearVelocity = Vector3.ProjectOnPlane(rb.linearVelocity, wallHit.normal);
     }
 
-   
-
     public void SetSurfaceType(Surface surface)
     {
         currentSurface = surface;
     }
 
-    //noted under drag application
-    private void ApplyDrag(float drag)
-    {
-        //delete this when refactoring is done
-        Vector3 vel = rb.linearVelocity;
-        float dampFactor = Mathf.Exp(-drag * Time.fixedDeltaTime);
-        if (currentSurface == Surface.Wall)
-        {
-            vel.y *= dampFactor;
-        }
-        vel.x *= dampFactor;
-        vel.z *= dampFactor;
-        //Change Drag systems to accomodate Y axis as well
-        rb.linearVelocity = vel;
-    }
     //noted under drag application
     public void SetDrag(float drag)
     {
@@ -267,8 +250,18 @@ public class StateCharacterControl : MonoBehaviour
             }
             else if (moveDir.magnitude>0.1f)
             {
-                Vector3 adjustJumpDirection = moveDir * 0.75f; //0.5 so that the jump angle is pointed more upwards
-                CharacterJump(CharacterConstants.NormalJumpForce, Vector3.up + adjustJumpDirection);   //little bit of an offset to make jump diagonal         
+                float wallInFrontDistance = 0.1f; 
+                bool isThereAWallInFront = Physics.SphereCast(wallCheckPoint.position, CharacterConstants.WallCheckRadius, faceDir, out RaycastHit wallOut, wallInFrontDistance, movementLayer);
+                if (isThereAWallInFront)
+                {
+                    Vector3 jumpOffset = faceDir.normalized * 0.01f;
+                    CharacterJump(CharacterConstants.NormalJumpForce, Vector3.up + jumpOffset);
+                }
+                else 
+                {
+                Vector3 adjustJumpDirection = moveDir * CharacterConstants.JumpAngle; //0.75 so that the jump angle is pointed more upwards
+                CharacterJump(CharacterConstants.NormalJumpForce, (Vector3.up + adjustJumpDirection).normalized);   //little bit of an offset to make jump diagonal         
+                }
             }
         }
         else if (currentSurface == Surface.Wall)

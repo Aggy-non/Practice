@@ -15,7 +15,7 @@ public class TuningPanel : MonoBehaviour
 
     //[Header("Drag")]
     //[SerializeField] private float landDrag = 21.5f;
-    [SerializeField] private float airDrag = 3.6f;
+    //[SerializeField] private float airDrag = 1f;
     //[SerializeField] private float wallDrag = 27.9f;
     //[SerializeField] private float chargeJumpAirDrag = 1f;
     //[SerializeField] private float startJumpDrag = 100f;
@@ -28,13 +28,14 @@ public class TuningPanel : MonoBehaviour
     //[Header("Move speed multiplier")]
     //[SerializeField] private float defaultMoveSpeedMultiplier = 1f;
     //[SerializeField] private float startJumpMultiplier = 0f;
-    [SerializeField] private float airSpeedMultiplier = 0.25f;
+    [SerializeField] private float airSpeedMultiplier = 0.15f;
 
     //[Header("Jump")]
     [SerializeField] private float normalJumpForce = 22f;
     //[SerializeField] private float wallJumpForce = 32f;
     //[SerializeField] private float bufferTime = 0.15f;
     //[SerializeField] private int chargeMultiplier = 15;
+    [SerializeField] private float jumpAngle = 0.5f;
 
     //[Header("Wall climb")]
     //[SerializeField] private float wallCheckDistance = 2.24f;
@@ -51,10 +52,11 @@ public class TuningPanel : MonoBehaviour
         //CharacterConstants.MoveSpeed = moveSpeed;
 
         //CharacterConstants.LandDrag = landDrag;
-        CharacterConstants.AirDrag = airDrag;
+        //CharacterConstants.AirDrag = airDrag;
         //CharacterConstants.WallDrag = wallDrag;
         //CharacterConstants.ChargeJumpAirDrag = chargeJumpAirDrag;
         //CharacterConstants.StartJumpDrag = startJumpDrag;
+        CharacterConstants.JumpAngle = jumpAngle;
 
         //CharacterConstants.LandGravityScale = landGravityScale;
         //CharacterConstants.AirGravityScale = airGravityScale;
