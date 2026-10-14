@@ -64,6 +64,7 @@ public class InputManager : MonoBehaviour
             //To change charge jump threshold go to input system map to change it
                      
             ChargeEnd?.Invoke();
+            characterControl.StateMachine.TransitionToState(characterControl.StateMachine.airState);
             //Debug.Log("Charge jump is performed ");
             chargeStarted = false;
         }
@@ -93,6 +94,7 @@ public class InputManager : MonoBehaviour
         chargeStarted = true;
         //Debug.Log("Charging");
         ChargeStart?.Invoke();
+        characterControl.StateMachine.TransitionToState(characterControl.StateMachine.chargeState);
     }
 
     private void ReturnMovementVector()

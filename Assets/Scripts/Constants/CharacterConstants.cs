@@ -24,14 +24,14 @@ public static class CharacterConstants
     // ---------- Move speed multiplier ----------
     public const float DefaultMoveSpeedMultiplier = 1;
     public const float StartJumpMultiplier = 0;
-    public static float AirSpeedMultiplier = 0.15f;//under tuning
+    public const float AirSpeedMultiplier = 0.15f;
 
     // ---------- Jump ----------
-    public static float NormalJumpForce = 22f;//under tuning
+    public const float NormalJumpForce = 22f;
     public const float WallJumpForce = 32f;
     public const float BufferTime = 0.15f;
     public const int ChargeMultiplier = 15;
-    public static float JumpAngle = 0.5f; //under tuning
+    public const float JumpAngle = 0.5f; 
 
     // ---------- Wall climb ----------
     public const float WallCheckDistance = 2.24f;

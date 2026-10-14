@@ -37,6 +37,7 @@ public class StopWatch : MonoBehaviour
     {
         isRunning = false;
         ChargeJumpHoldTime?.Invoke(stopwatchTime);
+        //print("Charge Jump Hold Time: " + stopwatchTime);
         ResetTimer();
     }
 

@@ -18,7 +18,10 @@ public class ChargeState : IState
     }
     public void Execute()
     {
-
+        if (!player.IsGrounded)
+        {
+            player.StateMachine.TransitionToState(player.StateMachine.airState);
+        }
     }
     public void Exit()
     {

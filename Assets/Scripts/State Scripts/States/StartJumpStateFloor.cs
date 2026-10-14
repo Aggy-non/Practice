@@ -17,10 +17,10 @@ public class StartJumpState : IState
     }
     public void Execute()
     {
-        //if (!player.IsGrounded)
-        //{
-        //    player.StateMachine.TransitionToState(player.StateMachine.airState);
-        //}
+        if (!player.IsGrounded)
+        {
+            player.StateMachine.TransitionToState(player.StateMachine.airState);
+        }
     }
     public void Exit()
     {

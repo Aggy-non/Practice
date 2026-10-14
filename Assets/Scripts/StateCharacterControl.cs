@@ -70,7 +70,6 @@ public class StateCharacterControl : MonoBehaviour
     {
         AssignEvents();
         CursorLock();
-        //rb.maxLinearVelocity = maxSpeed;
         stateMachine.Initialize(stateMachine.idleState);
         
     }
@@ -95,8 +94,6 @@ public class StateCharacterControl : MonoBehaviour
         MoveCharacter();
         RotatePlayer();
         ApplyDrag();
-        //print("wallcheck: " + isWallClimbing + " groundcheck: " + isGrounded);
-        //print(" surface: " + currentSurface);
     }
 
     // noted under current move vector
@@ -144,11 +141,6 @@ public class StateCharacterControl : MonoBehaviour
     //noted under movement application
     private void MoveCharacter()
     {
-    //    else
-    //    {
-    //        multiplier = IsChargeJumpActive ? chargeJumpMoveSpeed : 1f;
-    //    }
-
         rb.AddForce(moveDir * CharacterConstants.MoveSpeed * multiplier, ForceMode.VelocityChange);
         if (currentSurface == Surface.Wall)
         {
@@ -210,15 +202,8 @@ public class StateCharacterControl : MonoBehaviour
     //noted under ground check
     private void GroundCheck()
     {
-        bool wasGrounded = isGrounded;
         Vector3 origin = transform.TransformPoint(charCollider.center);
         isGrounded = Physics.SphereCast(origin, CharacterConstants.FeetRadius, Vector3.down, out RaycastHit hitInfo, CharacterConstants.GroundCheckDistance, movementLayer);
-
-        //print("Was Grouned : " + wasGrounded + " Is Grounded : " + isGrounded);
-
-        if (!wasGrounded && isGrounded)
-        { // just landed
-        }
     }
 
     //noted under wall check
@@ -247,6 +232,7 @@ public class StateCharacterControl : MonoBehaviour
             {                
                 Vector3 jumpOffset = faceDir.normalized * 0.01f;
                 CharacterJump(CharacterConstants.NormalJumpForce, Vector3.up + jumpOffset);   //little bit of an offset to make sure wallcheck doesnt check directly upwards         
+                stateMachine.TransitionToState(stateMachine.airState);
             }
             else if (moveDir.magnitude>0.1f)
             {
@@ -256,19 +242,20 @@ public class StateCharacterControl : MonoBehaviour
                 {
                     Vector3 jumpOffset = faceDir.normalized * 0.01f;
                     CharacterJump(CharacterConstants.NormalJumpForce, Vector3.up + jumpOffset);
+                    stateMachine.TransitionToState(stateMachine.airState);
                 }
                 else 
                 {
                 Vector3 adjustJumpDirection = moveDir * CharacterConstants.JumpAngle; //0.75 so that the jump angle is pointed more upwards
                 CharacterJump(CharacterConstants.NormalJumpForce, (Vector3.up + adjustJumpDirection).normalized);   //little bit of an offset to make jump diagonal         
+                stateMachine.TransitionToState(stateMachine.airState);
                 }
             }
         }
         else if (currentSurface == Surface.Wall)
         {
             DetachFromWall();
-            float upwardsOffset = 1f;
-            CharacterJump(wallJumpForce, wallHit.normal + new Vector3(0, upwardsOffset, 0));
+            CharacterJump(wallJumpForce, wallHit.normal + Vector3.up);
         }
         else
         {
@@ -292,13 +279,12 @@ public class StateCharacterControl : MonoBehaviour
     }
 
     //noted under character jump
-    private void CharacterJump(float jumpForce, Vector3 jumpDirection, IState nextState = null)
-    {
-        print("jumping");
+    private void CharacterJump(float jumpForce, Vector3 jumpDirection)
+    {   
+        //print("jumpforce " + jumpForce);
         rb.linearVelocity = new(rb.linearVelocity.x, 0, rb.linearVelocity.z);
         rb.AddForce(jumpDirection * jumpForce, ForceMode.Impulse);
         SetFaceDir(Vector3.ProjectOnPlane(jumpDirection, Vector3.up).normalized);
-        stateMachine.TransitionToState(nextState ?? stateMachine.airState);
     }
 
 
@@ -349,8 +335,6 @@ public class StateCharacterControl : MonoBehaviour
     //noted under cancel jump
     private void CancelJumping()
     {
-        //jumpStart = false;
-        //switch to previous state if jump is cancelled
         if (currentSurface == Surface.Ground)
         {
             stateMachine.TransitionToState(stateMachine.idleState);
@@ -405,7 +389,8 @@ public class StateCharacterControl : MonoBehaviour
 
         Vector3 latchDirection = (latchTarget - rb.position).normalized;
 
-        CharacterJump(CharacterConstants.NormalJumpForce, latchDirection, stateMachine.wallState);
+        CharacterJump(CharacterConstants.NormalJumpForce, latchDirection);
+        stateMachine.TransitionToState(stateMachine.wallState);
     }
 
     private void OnDrawGizmos()
