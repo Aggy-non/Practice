@@ -14,6 +14,7 @@ public class DefaultAirState : IState
         player.SetDrag(CharacterConstants.AirDrag);
         player.SetSurfaceType(StateCharacterControl.Surface.Air);
         player.SetMoveSpeedMultiplier(CharacterConstants.AirSpeedMultiplier);
+        CameraManager.Instance.MainCameraActive();
         Debug.Log("default air state");
     }
     public void Execute()

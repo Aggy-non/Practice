@@ -15,6 +15,7 @@ public class WallState : IState
         player.SetDrag(CharacterConstants.WallDrag);
         player.SetSurfaceType(StateCharacterControl.Surface.Wall);
         player.SetMoveSpeedMultiplier(CharacterConstants.DefaultMoveSpeedMultiplier);
+        CameraManager.Instance.WallCameraActive();
         Debug.Log("Wall State");
     }
 

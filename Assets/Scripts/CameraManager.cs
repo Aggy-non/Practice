@@ -4,27 +4,33 @@ using System;
 
 public class CameraManager : MonoBehaviour
 {
+
     [SerializeField] private CinemachineCamera aimCamera;
     [SerializeField] private CinemachineCamera mainCamera;
     [SerializeField] private CinemachineCamera wallCamera;
-    
-    //[SerializeField] private bool isAim=false;
 
-    private InputManager inputManager;
-    //private CharacterControl characterControl;
-    private StateCharacterControl characterControl;
+    //[SerializeField] private bool isAim=false;
+    public static CameraManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject); // a second copy showed up, so remove it
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject); // optional: survive scene changes
+    }
     private void Start()
     {
-        inputManager = GetComponent<InputManager>();
-        inputManager.ChargeStart += AimCameraActive;
-        inputManager.ChargeEnd += MainCameraActive;
-        inputManager.CancelJumping += MainCameraActive;
         MainCameraActive();
         
     }
 
 
-    private void AimCameraActive()
+    public void AimCameraActive()
     {
         SetPriority(aimCamera, 20);
         SetPriority(mainCamera, 10);
@@ -53,4 +59,3 @@ public class CameraManager : MonoBehaviour
 
 }
 
-//rotate plater to face aim camera 

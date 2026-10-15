@@ -1,4 +1,5 @@
 using Unity.VisualScripting;
+using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 
 public class IdleState : IState
@@ -17,14 +18,19 @@ public class IdleState : IState
         player.SetDrag(CharacterConstants.LandDrag);
         player.SetSurfaceType(StateCharacterControl.Surface.Ground);
         player.SetMoveSpeedMultiplier(CharacterConstants.DefaultMoveSpeedMultiplier);
+        CameraManager.Instance.MainCameraActive();
         Debug.Log("IdleState");
     }
     public void Execute()
     {
-        if(Mathf.Abs(player.Rb.linearVelocity.x)>0.1f || Mathf.Abs(player.Rb.linearVelocity.z)> 0.1f)
+        //if(Mathf.Abs(player.Rb.linearVelocity.x)>0.1f || Mathf.Abs(player.Rb.linearVelocity.z)> 0.1f)
+        //{
+        ////    Debug.Log(Mathf.Abs(player.Rb.linearVelocity.z));
+        ////    Debug.Log(Mathf.Abs(player.Rb.linearVelocity.x));
+        //    player.StateMachine.TransitionToState(player.StateMachine.floorMoveState);
+        //}
+        if (player.MoveDir.normalized.magnitude > 0.1f)
         {
-        //    Debug.Log(Mathf.Abs(player.Rb.linearVelocity.z));
-        //    Debug.Log(Mathf.Abs(player.Rb.linearVelocity.x));
             player.StateMachine.TransitionToState(player.StateMachine.floorMoveState);
         }
 

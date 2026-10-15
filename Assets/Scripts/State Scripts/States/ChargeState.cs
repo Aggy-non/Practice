@@ -11,9 +11,8 @@ public class ChargeState : IState
     public void Enter()
     {
         player.SetDrag(CharacterConstants.ChargeJumpAirDrag);
-        player.SetGravity(CharacterConstants.AirGravityScale);
         player.SetSurfaceType(StateCharacterControl.Surface.Air);
-        player.SetMoveSpeedMultiplier(CharacterConstants.DefaultMoveSpeedMultiplier);
+        CameraManager.Instance.AimCameraActive();
         Debug.Log("Charge state");
     }
     public void Execute()
@@ -22,6 +21,7 @@ public class ChargeState : IState
         {
             player.StateMachine.TransitionToState(player.StateMachine.airState);
         }
+
     }
     public void Exit()
     {

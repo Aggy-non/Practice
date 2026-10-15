@@ -21,6 +21,7 @@ public class StateCharacterControl : MonoBehaviour
     [Header("Movement settings")]
     private Vector3 InputDir;
     private Vector3 moveDir;
+    public Vector3 MoveDir => moveDir;
     private Vector3 faceDir;
     public Vector3 FaceDir => faceDir;
     private float multiplier;
@@ -30,15 +31,11 @@ public class StateCharacterControl : MonoBehaviour
     private float currentDrag;
 
     [Header("Jump settings")]
-    [SerializeField] private float wallJumpForce;
     private float bufferTimeCounter;
 
     [Header("Camera Settings")]
-    [SerializeField] private CameraManager cameraManager;
     [SerializeField] private Transform cameraPosition;
     [SerializeField] private Transform aimCameraPosition;
-    [SerializeField] private CinemachineCamera aimCamera;
-    [SerializeField] private Camera mainCamera;
 
     [Header("Charge Jump")]
     private StopWatch stopWatch;
@@ -54,8 +51,6 @@ public class StateCharacterControl : MonoBehaviour
     //State Machine
     private CharacterStateMachine stateMachine;
     public CharacterStateMachine StateMachine => stateMachine;
-    private IState currentState;
-    public IState CurrentState => currentState;
 
 
     #endregion
@@ -80,13 +75,13 @@ public class StateCharacterControl : MonoBehaviour
         CalculateCurrentMoveDir();
         WallCheck();
         stateMachine.Exectue();
-        if(currentSurface == Surface.Wall)
-        {
-            cameraManager.WallCameraActive();
-        }
-
+        //printTheValues();
     }
 
+    private void printTheValues()
+    {
+        print("current drag" + currentDrag);
+    }
     private void FixedUpdate()
     {
         //make a seperate class for these gravity and drag
@@ -255,7 +250,7 @@ public class StateCharacterControl : MonoBehaviour
         else if (currentSurface == Surface.Wall)
         {
             DetachFromWall();
-            CharacterJump(wallJumpForce, wallHit.normal + Vector3.up);
+            CharacterJump(CharacterConstants.WallJumpForce, wallHit.normal + Vector3.up);
         }
         else
         {
@@ -275,7 +270,7 @@ public class StateCharacterControl : MonoBehaviour
             DetachFromWall();
         }
         CharacterJump((chargeJumpPower * CharacterConstants.ChargeMultiplier) + CharacterConstants.NormalJumpForce, aimCameraPosition.forward);
-
+        CharacterJump(1, Vector3.up);
     }
 
     //noted under character jump
@@ -375,7 +370,6 @@ public class StateCharacterControl : MonoBehaviour
         //faceDir = wallHit.normal;
         stateMachine.TransitionToState(stateMachine.airState);
         SetFaceDir(wallHit.normal);
-        cameraManager.MainCameraActive();
     }
 
     //noted under attach to wall 
@@ -440,6 +434,5 @@ public class StateCharacterControl : MonoBehaviour
         inputManager.CancelJumping += CancelJumping;
         inputManager.ToggleWallClimb += ToggleWallClimb;
         stopWatch.ChargeJumpHoldTime += ChargeJump;
-        stateMachine.OnStateChanged += value => currentState = value;
     }
 }
