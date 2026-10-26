@@ -40,10 +40,29 @@ public class StateCharacterControl : MonoBehaviour
     [Header("Charge Jump")]
     private StopWatch stopWatch;
 
+    // ---- ADD: DEBUG (delete with the logs) ----
+    private int dbgTicksSinceJump = -1;
+    private Vector3 dbgLaunchPos;
+    private float dbgLaunchTime;
+    // ---- END ADD ----
+
     [Header("Wall Climb")]
     [SerializeField] Transform wallCheckPoint;
     private bool wallDetected;
     public bool WallDetected => wallDetected;
+    public Vector3 WallNormal => wallHit.normal;
+
+    public Vector3 GetWallAttachPosition()
+    {
+        Vector3 checkPointOffset = wallCheckPoint.position - transform.position;
+        Vector3 desiredCheckPoint = wallHit.point + wallHit.normal * (charCollider.radius + CharacterConstants.WallClearance);
+        Vector3 target = desiredCheckPoint - checkPointOffset;
+
+        // lift off the floor so the wall states don't send you straight back to idle
+        if (isGrounded) target += Vector3.up * CharacterConstants.WallAttachGroundLift;
+
+        return target;
+    }
     public enum Surface { Wall, Ground, Air }
     private Surface currentSurface = Surface.Air;
     private RaycastHit wallHit;
@@ -82,9 +101,29 @@ public class StateCharacterControl : MonoBehaviour
     {
         print("current drag" + currentDrag);
     }
+
+    // ---- ADD ----
+    private void LogFlightDebug()
+    {
+        if (dbgTicksSinceJump < 0) return;
+
+        if (dbgTicksSinceJump <= 3)
+        {
+            Debug.Log($"[REAL tick {dbgTicksSinceJump}] vel={rb.linearVelocity} pos={rb.position} grounded={isGrounded}");
+        }
+        dbgTicksSinceJump++;
+
+        if (Time.time - dbgLaunchTime > 0.3f && isGrounded)
+        {
+            Debug.Log($"[REAL landed] pos={rb.position} displacement={rb.position - dbgLaunchPos} flightTime={Time.time - dbgLaunchTime:F2}s");
+            dbgTicksSinceJump = -1;
+        }
+    }
+    // ---- END ADD ----
     private void FixedUpdate()
     {
         //make a seperate class for these gravity and drag
+        //LogFlightDebug();   
         CustomGravity();
         MoveCharacter();
         RotatePlayer();
@@ -249,6 +288,7 @@ public class StateCharacterControl : MonoBehaviour
         }
         else if (currentSurface == Surface.Wall)
         {
+            print("wall jump");
             DetachFromWall();
             CharacterJump(CharacterConstants.WallJumpForce, wallHit.normal + Vector3.up);
         }
@@ -259,18 +299,30 @@ public class StateCharacterControl : MonoBehaviour
         }       
     }
 
-    
+
 
     //noted under charge jump
     private void ChargeJump(float chargeJumpPower)
     {
-
         if (currentSurface == Surface.Wall)
         {
             DetachFromWall();
         }
-        CharacterJump((chargeJumpPower * CharacterConstants.ChargeMultiplier) + CharacterConstants.NormalJumpForce, aimCameraPosition.forward);
-        CharacterJump(1, Vector3.up);
+
+        float force = (chargeJumpPower * CharacterConstants.ChargeMultiplier) + CharacterConstants.NormalJumpForce;
+
+        //// DEBUG
+        //Debug.Log($"[REAL @release] chargePower={chargeJumpPower:F3} force={force:F2} dir={aimCameraPosition.forward}\n" +
+        //          $"  velBeforeJump={rb.linearVelocity} pos={rb.position}");
+
+        CharacterJump(force, aimCameraPosition.forward);
+        stateMachine.TransitionToState(stateMachine.airState);
+        // removed: CharacterJump(1, Vector3.up);
+
+        // DEBUG
+        dbgTicksSinceJump = 0;
+        dbgLaunchPos = rb.position;
+        dbgLaunchTime = Time.time;
     }
 
     //noted under character jump
@@ -291,8 +343,9 @@ public class StateCharacterControl : MonoBehaviour
     }
 
     //noted under rotate player
-    private void SetFaceDir(Vector3 direction)
+    public void SetFaceDir(Vector3 direction)
     {
+        if (direction.sqrMagnitude < 0.0001f) return;
         faceDir = direction.normalized;
     }
 
@@ -330,9 +383,9 @@ public class StateCharacterControl : MonoBehaviour
     //noted under cancel jump
     private void CancelJumping()
     {
-        if (currentSurface == Surface.Ground)
+        if (stateMachine.CurrentState == stateMachine.chargeState)
         {
-            stateMachine.TransitionToState(stateMachine.idleState);
+            stateMachine.TransitionToState(isGrounded ? stateMachine.idleState : stateMachine.airState);
         }
     }
 
@@ -354,13 +407,17 @@ public class StateCharacterControl : MonoBehaviour
     //noted under toggle wall climb
     private void ToggleWallClimb()
     {
+        IState s = stateMachine.CurrentState;
+
         if (currentSurface == Surface.Wall)
         {
             DetachFromWall();
         }
-        else if (wallDetected)
+        else if (wallDetected && (s == stateMachine.idleState ||
+                                  s == stateMachine.floorMoveState ||
+                                  s == stateMachine.airState))
         {
-            AttachToWall();
+            stateMachine.TransitionToState(stateMachine.wallAttachState);
         }
     }
 
@@ -372,20 +429,6 @@ public class StateCharacterControl : MonoBehaviour
         SetFaceDir(wallHit.normal);
     }
 
-    //noted under attach to wall 
-    private void AttachToWall()
-    {
-        Vector3 checkPointOffset = wallCheckPoint.position - transform.position;
-        Vector3 stickPosition = wallHit.point + wallHit.normal * charCollider.radius;
-
-        float offset = (currentSurface == Surface.Ground) ? 1 : 0; // little upward nudge when climbing from ground to wall
-        Vector3 latchTarget = stickPosition - checkPointOffset + new Vector3(0, offset, 0);
-
-        Vector3 latchDirection = (latchTarget - rb.position).normalized;
-
-        CharacterJump(CharacterConstants.NormalJumpForce, latchDirection);
-        stateMachine.TransitionToState(stateMachine.wallState);
-    }
 
     private void OnDrawGizmos()
     {

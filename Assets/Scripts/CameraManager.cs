@@ -6,8 +6,10 @@ public class CameraManager : MonoBehaviour
 {
 
     [SerializeField] private CinemachineCamera aimCamera;
+    [SerializeField] private CinemachineOrbitalFollow aimCameraAxis;
     [SerializeField] private CinemachineCamera mainCamera;
     [SerializeField] private CinemachineCamera wallCamera;
+    [SerializeField] private CinemachineOrbitalFollow wallCameraAxis;
 
     //[SerializeField] private bool isAim=false;
     public static CameraManager Instance { get; private set; }
@@ -35,6 +37,7 @@ public class CameraManager : MonoBehaviour
         SetPriority(aimCamera, 20);
         SetPriority(mainCamera, 10);
         SetPriority(wallCamera, 0);
+        aimCameraAxis.VerticalAxis.Value = 21f;
     }
 
     public void MainCameraActive()
@@ -49,6 +52,7 @@ public class CameraManager : MonoBehaviour
         SetPriority(aimCamera, 0);
         SetPriority(mainCamera, 10);
         SetPriority(wallCamera, 20);
+        wallCameraAxis.VerticalAxis.Value = 17.5f;
     }
 
     private void SetPriority(CinemachineCamera cam, int value)

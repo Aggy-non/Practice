@@ -14,6 +14,7 @@ public class CharacterStateMachine
     public DefaultAirState airState;
     public ChargeState chargeState;
     public WallState wallState;
+    public WallAttachState wallAttachState;
     public WallMoveState wallMoveState;
 
     public event Action<IState> OnStateChanged;
@@ -27,6 +28,7 @@ public class CharacterStateMachine
         this.airState = new DefaultAirState(player);
         this.chargeState = new ChargeState(player);
         this.wallState = new WallState(player);
+        this.wallAttachState = new WallAttachState(player);
         this.wallMoveState = new WallMoveState(player);
         Debug.Log("state machine online");
     }

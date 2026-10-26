@@ -677,14 +677,14 @@ MonoBehaviour:
   Radius: 5
   Orbits:
     Top:
-      Radius: 4
-      Height: 1
+      Radius: 2
+      Height: -2
     Center:
       Radius: 4
       Height: 0
     Bottom:
-      Radius: 4
-      Height: -1
+      Radius: 2
+      Height: 2
     SplineCurvature: 0
   RecenteringTarget: 2
   HorizontalAxis:
@@ -698,7 +698,7 @@ MonoBehaviour:
       Time: 2
     Restrictions: 0
   VerticalAxis:
-    Value: 45
+    Value: 17.5
     Center: 17.5
     Range: {x: -10, y: 45}
     Wrap: 0
@@ -768,8 +768,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 469717163}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.12218326, y: 0.0000000020835436, z: -2.5649605e-10, w: 0.9925076}
-  m_LocalPosition: {x: 24.71, y: 2.4, z: 23.37}
+  m_LocalRotation: {x: 0, y: -2.0833932e-15, z: -1.8702626e-16, w: 1}
+  m_LocalPosition: {x: 24.71, y: 0.9, z: 23.37}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1675,7 +1675,7 @@ MonoBehaviour:
       Time: 2
     Restrictions: 0
   VerticalAxis:
-    Value: 17.5
+    Value: 23.1
     Center: 17.5
     Range: {x: -10, y: 45}
     Wrap: 0
@@ -1745,8 +1745,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 797884907}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.12689905, y: 0.00000005539278, z: 0.000000007086581, w: 0.9919157}
-  m_LocalPosition: {x: 24.71, y: 1.34, z: 25.03}
+  m_LocalRotation: {x: -0.052236762, y: 0.000000015014628, z: 7.8538775e-10, w: 0.99863476}
+  m_LocalPosition: {x: 24.71, y: 1.9957813, z: 25.174572}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2814,8 +2814,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraManager
   aimCamera: {fileID: 797884912}
+  aimCameraAxis: {fileID: 797884911}
   mainCamera: {fileID: 2136653355}
   wallCamera: {fileID: 469717168}
+  wallCameraAxis: {fileID: 469717167}
 --- !u!1 &1620164030
 GameObject:
   m_ObjectHideFlags: 0
@@ -3353,7 +3355,7 @@ Rigidbody:
   m_GameObject: {fileID: 1689519840}
   serializedVersion: 5
   m_Mass: 1
-  m_LinearDamping: 0.05
+  m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -3516,15 +3518,15 @@ LineRenderer:
       serializedVersion: 2
       key0: {r: 1, g: 1, b: 1, a: 1}
       key1: {r: 1, g: 1, b: 1, a: 1}
-      key2: {r: 1, g: 0, b: 0, a: 0}
+      key2: {r: 1, g: 1, b: 1, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
       key5: {r: 0, g: 0, b: 0, a: 0}
       key6: {r: 0, g: 0, b: 0, a: 0}
       key7: {r: 0, g: 0, b: 0, a: 0}
       ctime0: 0
-      ctime1: 55705
-      ctime2: 56360
+      ctime1: 65535
+      ctime2: 65535
       ctime3: 0
       ctime4: 0
       ctime5: 0
@@ -3540,7 +3542,7 @@ LineRenderer:
       atime7: 0
       m_Mode: 1
       m_ColorSpace: 0
-      m_NumColorKeys: 3
+      m_NumColorKeys: 2
       m_NumAlphaKeys: 2
     numCornerVertices: 0
     numCapVertices: 0
@@ -4505,7 +4507,7 @@ MonoBehaviour:
   TargetOffset: {x: 0, y: 0, z: 0}
   TrackerSettings:
     BindingMode: 4
-    PositionDamping: {x: 0.25, y: 0.175, z: 0.25}
+    PositionDamping: {x: 0.25, y: 1, z: 0.5}
     AngularDampingMode: 0
     RotationDamping: {x: 1, y: 1, z: 1}
     QuaternionDamping: 1
@@ -4604,7 +4606,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2136653350}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.085786596, y: -0.00085802685, z: 0.000073879586, w: 0.9963132}
+  m_LocalRotation: {x: 0.08578662, y: -0.00085802714, z: 0.00007387963, w: 0.9963132}
   m_LocalPosition: {x: 24.71, y: 3.52, z: 24.78}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0

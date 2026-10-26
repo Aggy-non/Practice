@@ -12,28 +12,27 @@ public class WallMoveState : IState
     public void Enter()
     {
         player.SetSurfaceType(StateCharacterControl.Surface.Wall);
-        Debug.Log("Wall Move State");
         CameraManager.Instance.WallCameraActive();
+        Debug.Log("Wall Move State");
     }
 
     public void Execute()
     {
-        if (player.Rb.linearVelocity == Vector3.zero)
+        if (!player.WallDetected)
         {
-            player.StateMachine.TransitionToState(player.StateMachine.wallState);
+            player.StateMachine.TransitionToState(player.StateMachine.airState);
+            return;
         }
         if (player.IsGrounded)
         {
             player.StateMachine.TransitionToState(player.StateMachine.idleState);
+            return;
         }
-        if (!player.WallDetected)
+        if (player.MoveDir.sqrMagnitude < 0.01f)
         {
-            player.StateMachine.TransitionToState(player.StateMachine.airState);
+            player.StateMachine.TransitionToState(player.StateMachine.wallState);
         }
     }
 
-    public void Exit()
-    {
-
-    }
+    public void Exit() { }
 }

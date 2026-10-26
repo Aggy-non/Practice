@@ -21,22 +21,21 @@ public class WallState : IState
 
     public void Execute()
     {
-        if (Mathf.Abs(player.Rb.linearVelocity.x) > 0.1f)
+        if (!player.WallDetected)
         {
-            player.StateMachine.TransitionToState(player.StateMachine.wallState);
+            player.StateMachine.TransitionToState(player.StateMachine.airState);
+            return;
         }
         if (player.IsGrounded)
         {
             player.StateMachine.TransitionToState(player.StateMachine.idleState);
+            return;
         }
-        if (!player.WallDetected)
+        if (player.MoveDir.sqrMagnitude > 0.01f)
         {
-            player.StateMachine.TransitionToState(player.StateMachine.airState);
+            player.StateMachine.TransitionToState(player.StateMachine.wallMoveState);
         }
     }
 
-    public void Exit()
-    {
-
-    }
+    public void Exit() { }
 }

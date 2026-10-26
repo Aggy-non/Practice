@@ -1,4 +1,4 @@
-using UnityEditor;
+using System.Net;
 using UnityEngine;
 
 public class ChargeJumpVisuals : MonoBehaviour
@@ -21,6 +21,13 @@ public class ChargeJumpVisuals : MonoBehaviour
     [Header("Arc preview settings")]
     [SerializeField] private int maxSimSteps = 120;
     private Vector3[] arcPoints;
+
+    private float dbgJumpForce;
+    private Vector3 dbgLaunchDir;
+    private Vector3 dbgStartVel;
+    private Vector3 dbgImpulseVel;
+    private Vector3 dbgEndPoint;
+    private int dbgPointCount;
 
     [Header("Collision settings")]
     [SerializeField] private LayerMask blockingLayers; 
@@ -63,25 +70,35 @@ public class ChargeJumpVisuals : MonoBehaviour
     {
         float jumpForce = (chargeTime * CharacterConstants.ChargeMultiplier) + CharacterConstants.NormalJumpForce;
 
-        Vector3 startVel = rb.linearVelocity; // shift the rb linear velocity to a new class to avoid errors
-        startVel.y = 0f;
+        // the real jump fires along aimCameraPosition.forward at the instant of release,
+        // so predict with the raw camera forward, not the smoothed currentDirection
+        Vector3 launchDir = aimCamera.forward;
 
-        Vector3 simVel = startVel + (currentDirection * jumpForce) / rb.mass;
+        Vector3 startVel = rb.linearVelocity;
+        startVel.y = 0f;                                          // CharacterJump zeroes vertical velocity first
+        Vector3 impulseVel = (launchDir * jumpForce) / rb.mass;   // ForceMode.Impulse = force / mass
+
+        Vector3 simVel = startVel;                                // velocity BEFORE the impulse lands
         Vector3 simPos = startPoint.position;
 
-        float dragDecay = Mathf.Exp(CharacterConstants.ChargeJumpAirDrag * Time.fixedDeltaTime);
+        // minus sign matches ApplyDrag(); AirDrag because DefaultAirState is what runs after release
+        float dragDecay = Mathf.Exp(-CharacterConstants.AirDrag * Time.fixedDeltaTime);
         float gravityAccel = Physics.gravity.y * CharacterConstants.AirGravityScale;
 
         int pointCount = 0;
         arcPoints[pointCount++] = simPos;
+        bool hitSomething = false;
 
         for (int i = 1; i < maxSimSteps; i++)
         {
             Vector3 prevPos = simPos;
 
-            simVel.y += gravityAccel * Time.fixedDeltaTime;
+            // same order as the real FixedUpdate: ApplyDrag() runs first, then the physics step
+            // adds the impulse and gravity, then position integrates
             simVel.x *= dragDecay;
             simVel.z *= dragDecay;
+            if (i == 1) simVel += impulseVel;
+            simVel.y += gravityAccel * Time.fixedDeltaTime;
             simPos += simVel * Time.fixedDeltaTime;
 
             Vector3 segment = simPos - prevPos;
@@ -93,28 +110,46 @@ public class ChargeJumpVisuals : MonoBehaviour
 
                 if (Physics.Raycast(prevPos, segmentDir, out RaycastHit hit, segmentLength, blockingLayers))
                 {
-                    targetVisual.SetActive(true);
-                    Vector3 targetNormal = hit.normal;
-                    Vector3 targetLocation = hit.point;
+                    hitSomething = true;
                     UpdateTargetPosition(hit.normal, hit.point);
                     arcPoints[pointCount++] = hit.point - segmentDir * backoffDistance;
                     break;
                 }
-                else
-                {
-                    targetVisual.SetActive(false);
-                }
             }
 
-            arcPoints[pointCount++] = simPos;           
+            arcPoints[pointCount++] = simPos;
+        }
+
+        if (targetVisual.activeSelf != hitSomething)
+        {
+            targetVisual.SetActive(hitSomething);
         }
 
         lr.positionCount = pointCount;
         lr.SetPositions(arcPoints);
+
+        // DEBUG snapshot
+        dbgJumpForce = jumpForce;
+        dbgLaunchDir = launchDir;
+        dbgStartVel = startVel;
+        dbgImpulseVel = impulseVel;
+        dbgEndPoint = arcPoints[pointCount - 1];
+        dbgPointCount = pointCount;
     }
 
     private void LineErase()
     {
+        //if (lineExtending) // this also fires from CancelJumping, so only log real releases
+        //{
+        //    Debug.Log(
+        //        $"[PREVIEW @release] chargeTime={chargeTime:F3} jumpForce={dbgJumpForce:F2}\n" +
+        //        $"  dir={dbgLaunchDir} (smoothed currentDirection={currentDirection})\n" +
+        //        $"  startVel={dbgStartVel} impulseVel={dbgImpulseVel}\n" +
+        //        $"  dragDecay={Mathf.Exp(-CharacterConstants.AirDrag * Time.fixedDeltaTime):F4} gravityAccel={Physics.gravity.y * CharacterConstants.AirGravityScale:F2}\n" +
+        //        $"  origin(startPoint)={startPoint.position} rb.position={rb.position}\n" +
+        //        $"  predictedEnd={dbgEndPoint} steps={dbgPointCount}");
+        //}
+
         targetVisual.SetActive(false);
         lineExtending = false;
         lr.positionCount = 0;
@@ -122,6 +157,7 @@ public class ChargeJumpVisuals : MonoBehaviour
 
     private void LineExtend()
     {
+        chargeTime = 0f; // StopWatch only reports the new time next frame; don't simulate with the previous charge
         lineExtending = true;
     }
 

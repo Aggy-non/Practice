@@ -10,7 +10,7 @@ public class ChargeState : IState
     }
     public void Enter()
     {
-        player.SetDrag(CharacterConstants.ChargeJumpAirDrag);
+        player.SetDrag(CharacterConstants.AirDrag);
         player.SetSurfaceType(StateCharacterControl.Surface.Air);
         CameraManager.Instance.AimCameraActive();
         Debug.Log("Charge state");
