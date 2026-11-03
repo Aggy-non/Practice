@@ -12,7 +12,7 @@ public class FloorMoveState : IState
     public void Enter()
     {
         player.SetSurfaceType(StateCharacterControl.Surface.Ground);
-        Debug.Log("floor Move State");
+        //Debug.Log("floor Move State");
     }
     public void Execute()
     {

@@ -86,15 +86,20 @@ public class InputManager : MonoBehaviour
         }
         
     }
-
-
+   
     private void StartJumpCharge(InputAction.CallbackContext context)
     {
-        //start charging the charge jump
+        // a charge can only grow out of a held jump press
+        IState chargeTarget;
+        if (characterControl.currentState == characterControl.StateMachine.startJumpStateFloor)
+            chargeTarget = characterControl.StateMachine.chargeStateFloor;
+        else if (characterControl.currentState == characterControl.StateMachine.startJumpStateWall)
+            chargeTarget = characterControl.StateMachine.chargeStateWall;
+        else return; // anywhere else (mid-air included): no charging
+
         chargeStarted = true;
-        //Debug.Log("Charging");
         ChargeStart?.Invoke();
-        characterControl.StateMachine.TransitionToState(characterControl.StateMachine.chargeState);
+        characterControl.StateMachine.TransitionToState(chargeTarget);
     }
 
     private void ReturnMovementVector()

@@ -17,7 +17,7 @@ public class DefaultAirState : IState
         player.SetMoveSpeedMultiplier(CharacterConstants.AirSpeedMultiplier);
         enterTime = Time.time;
         CameraManager.Instance.MainCameraActive();
-        Debug.Log("default air state");
+        //Debug.Log("default air state");
     }
     public void Execute()
     {

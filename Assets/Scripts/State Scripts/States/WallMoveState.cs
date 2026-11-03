@@ -13,7 +13,7 @@ public class WallMoveState : IState
     {
         player.SetSurfaceType(StateCharacterControl.Surface.Wall);
         CameraManager.Instance.WallCameraActive();
-        Debug.Log("Wall Move State");
+        //Debug.Log("Wall Move State");
     }
 
     public void Execute()

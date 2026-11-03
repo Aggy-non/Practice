@@ -1,9 +1,9 @@
 using UnityEngine;
 
-public class ChargeState : IState
+public class ChargeStateFloor : IState
 {
     private readonly StateCharacterControl player;
-    public ChargeState(StateCharacterControl player)
+    public ChargeStateFloor(StateCharacterControl player)
     {
         this.player = player;
 
@@ -13,7 +13,7 @@ public class ChargeState : IState
         player.SetDrag(CharacterConstants.AirDrag);
         player.SetSurfaceType(StateCharacterControl.Surface.Air);
         CameraManager.Instance.AimCameraActive();
-        Debug.Log("Charge state");
+        //Debug.Log("Charge state");
     }
     public void Execute()
     {

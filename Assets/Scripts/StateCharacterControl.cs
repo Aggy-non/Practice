@@ -31,7 +31,7 @@ public class StateCharacterControl : MonoBehaviour
     private float currentDrag;
 
     [Header("Jump settings")]
-    private float bufferTimeCounter;
+    private float jumpBufferTimer;
 
     [Header("Camera Settings")]
     [SerializeField] private Transform cameraPosition;
@@ -66,10 +66,12 @@ public class StateCharacterControl : MonoBehaviour
     public enum Surface { Wall, Ground, Air }
     private Surface currentSurface = Surface.Air;
     private RaycastHit wallHit;
+    private float wallAttachBufferTimer;
 
     //State Machine
     private CharacterStateMachine stateMachine;
     public CharacterStateMachine StateMachine => stateMachine;
+    public IState currentState;
 
 
     #endregion
@@ -94,12 +96,14 @@ public class StateCharacterControl : MonoBehaviour
         CalculateCurrentMoveDir();
         WallCheck();
         stateMachine.Exectue();
+        UpdateJumpBuffer();
+        UpdateWallAttachBuffer();
         //printTheValues();
     }
 
     private void printTheValues()
     {
-        print("current drag" + currentDrag);
+        print("current surface" + currentSurface);
     }
 
     // ---- ADD ----
@@ -256,49 +260,60 @@ public class StateCharacterControl : MonoBehaviour
         Vector3 origin = wallCheckPoint.position;
         wallDetected = Physics.SphereCast(origin, CharacterConstants.WallCheckRadius, shootDir, out wallHit, CharacterConstants.WallCheckDistance, movementLayer);
     }
-
     //noted under normal jump
     private void PerformNormalJump()
     {
-        if (currentSurface == Surface.Ground)
+        if (currentSurface == Surface.Wall)
         {
-            if (moveDir.magnitude<0.1f)//wont work because the current state becomes `startJumpState` before the jump is performed, so this will never be true 
-            {                
-                Vector3 jumpOffset = faceDir.normalized * 0.01f;
-                CharacterJump(CharacterConstants.NormalJumpForce, Vector3.up + jumpOffset);   //little bit of an offset to make sure wallcheck doesnt check directly upwards         
-                stateMachine.TransitionToState(stateMachine.airState);
-            }
-            else if (moveDir.magnitude>0.1f)
-            {
-                float wallInFrontDistance = 0.1f; 
-                bool isThereAWallInFront = Physics.SphereCast(wallCheckPoint.position, CharacterConstants.WallCheckRadius, faceDir, out RaycastHit wallOut, wallInFrontDistance, movementLayer);
-                if (isThereAWallInFront)
-                {
-                    Vector3 jumpOffset = faceDir.normalized * 0.01f;
-                    CharacterJump(CharacterConstants.NormalJumpForce, Vector3.up + jumpOffset);
-                    stateMachine.TransitionToState(stateMachine.airState);
-                }
-                else 
-                {
-                Vector3 adjustJumpDirection = moveDir * CharacterConstants.JumpAngle; //0.75 so that the jump angle is pointed more upwards
-                CharacterJump(CharacterConstants.NormalJumpForce, (Vector3.up + adjustJumpDirection).normalized);   //little bit of an offset to make jump diagonal         
-                stateMachine.TransitionToState(stateMachine.airState);
-                }
-            }
-        }
-        else if (currentSurface == Surface.Wall)
-        {
-            print("wall jump");
+            //print("wall jump");
             DetachFromWall();
             CharacterJump(CharacterConstants.WallJumpForce, wallHit.normal + Vector3.up);
         }
-        else
+        else if (currentSurface == Surface.Ground)
         {
-            StopCoroutine(nameof(BufferJump));
-            StartCoroutine(nameof(BufferJump));
-        }       
+            PerformGroundJump();
+        }
+        else if (currentSurface == Surface.Air)
+        {
+            jumpBufferTimer = CharacterConstants.BufferTime; // remember the press, UpdateJumpBuffer fires it on landing
+        }
     }
 
+    private void PerformGroundJump()
+    {
+        Vector3 jumpDirection;
+
+        // standing still, or a wall right in front: straight up with a tiny forward bias so the wall check doesn't fire straight up
+        // (the || means the SphereCast only runs when you're actually moving)
+        if (moveDir.magnitude < 0.1f ||
+            Physics.SphereCast(wallCheckPoint.position, CharacterConstants.WallCheckRadius, faceDir, out _, 0.1f, movementLayer))
+        {
+            jumpDirection = Vector3.up + faceDir.normalized * 0.01f;
+        }
+        else
+        {
+            jumpDirection = (Vector3.up + moveDir * CharacterConstants.JumpAngle).normalized; // diagonal jump
+        }
+
+        CharacterJump(CharacterConstants.NormalJumpForce, jumpDirection);
+        stateMachine.TransitionToState(stateMachine.airState);
+    }
+
+    private void UpdateJumpBuffer()
+    {
+        if (jumpBufferTimer <= 0f) return;
+
+        jumpBufferTimer -= Time.deltaTime;
+
+        // fire only once the state machine itself says we've landed, so the stale-grounded frames after a launch can't trigger it
+        bool landed = isGrounded && (currentState == stateMachine.idleState || currentState == stateMachine.floorMoveState);
+        if (landed)
+        {
+            jumpBufferTimer = 0f;
+            stateMachine.TransitionToState(stateMachine.startJumpStateFloor);
+            PerformGroundJump();
+        }
+    }
 
 
     //noted under charge jump
@@ -349,23 +364,7 @@ public class StateCharacterControl : MonoBehaviour
         faceDir = direction.normalized;
     }
 
-    //noted under buffer jump
-    private IEnumerator BufferJump()
-    {
-        bufferTimeCounter = CharacterConstants.BufferTime;
-        while (bufferTimeCounter > 0)
-        {
-            if (isGrounded)
-            {
-                Vector3 jumpOffset = faceDir.normalized * 0.01f;
-                CharacterJump(CharacterConstants.NormalJumpForce, Vector3.up + jumpOffset); //little bit of an offset to make sure wallcheck doesnt check directly upwards  
-                yield break;
-            }
-
-            bufferTimeCounter -= Time.deltaTime;
-            yield return null;
-        }
-    }
+    
 
     //noted under gravity application
     //these set methods are correct just set them to public later
@@ -383,9 +382,13 @@ public class StateCharacterControl : MonoBehaviour
     //noted under cancel jump
     private void CancelJumping()
     {
-        if (stateMachine.CurrentState == stateMachine.chargeState)
+        if (currentState == stateMachine.chargeStateFloor)
         {
             stateMachine.TransitionToState(isGrounded ? stateMachine.idleState : stateMachine.airState);
+        }
+        else if (currentState == stateMachine.chargeStateWall)
+        {
+            stateMachine.TransitionToState(wallDetected ? stateMachine.wallState : stateMachine.airState);
         }
     }
 
@@ -393,9 +396,13 @@ public class StateCharacterControl : MonoBehaviour
     //noted under start jump
     private void StartJumping()
     {
-        if (currentSurface == Surface.Ground || currentSurface == Surface.Wall)
+        if (currentSurface == Surface.Ground)
         {
-            stateMachine.TransitionToState(stateMachine.startJumpState);
+            stateMachine.TransitionToState(stateMachine.startJumpStateFloor);
+        }
+        else if(currentSurface == Surface.Wall)
+        {
+            stateMachine.TransitionToState(stateMachine.startJumpStateWall);
         }
         else
         {
@@ -405,19 +412,49 @@ public class StateCharacterControl : MonoBehaviour
 
 
     //noted under toggle wall climb
+    //noted under toggle wall climb
     private void ToggleWallClimb()
     {
-        IState s = stateMachine.CurrentState;
-
-        if (currentSurface == Surface.Wall)
+        if (currentState == stateMachine.wallState || currentState == stateMachine.wallMoveState)
         {
+            wallAttachBufferTimer = 0f;
             DetachFromWall();
         }
-        else if (wallDetected && (s == stateMachine.idleState ||
-                                  s == stateMachine.floorMoveState ||
-                                  s == stateMachine.airState))
+        else if (CanAttachToWall)
         {
-            stateMachine.TransitionToState(stateMachine.wallAttachState);
+            if (wallDetected)
+            {
+                StartWallAttach();
+            }
+            else
+            {
+                wallAttachBufferTimer = CharacterConstants.WallAttachBufferTime; // no wall yet, remember the press
+            }
+        }
+    }
+
+    // the states you can start a wall attach from (same list the button used before)
+    private bool CanAttachToWall =>
+        currentState == stateMachine.idleState ||
+        currentState == stateMachine.floorMoveState ||
+        currentState == stateMachine.airState;
+
+    private void StartWallAttach()
+    {
+        wallAttachBufferTimer = 0f;
+        stateMachine.TransitionToState(stateMachine.wallAttachState);
+    }
+
+    private void UpdateWallAttachBuffer()
+    {
+        if (wallAttachBufferTimer <= 0f) return;
+
+        wallAttachBufferTimer -= Time.deltaTime;
+
+        // CanAttachToWall means a press in the buffer window can't pull you out of a charge or a held jump
+        if (wallDetected && CanAttachToWall)
+        {
+            StartWallAttach();
         }
     }
 
@@ -472,6 +509,7 @@ public class StateCharacterControl : MonoBehaviour
     private void AssignEvents()
     {
         inputManager.GetMovementVector += value => InputDir = value;
+        stateMachine.OnStateChanged += value => currentState = value;
         inputManager.NormalJump += PerformNormalJump;
         inputManager.StartJumping += StartJumping;
         inputManager.CancelJumping += CancelJumping;

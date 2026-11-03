@@ -1,9 +1,9 @@
 using UnityEngine;
 
-public class StartJumpState : IState    
+public class StartJumpStateFloor : IState    
 {
     private readonly StateCharacterControl player;
-    public StartJumpState(StateCharacterControl player)
+    public StartJumpStateFloor(StateCharacterControl player)
     {
         this.player = player;
        

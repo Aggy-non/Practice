@@ -28,10 +28,10 @@ public static class CharacterConstants
 
     // ---------- Jump ----------
     public const float NormalJumpForce = 25f;
-    public const float WallJumpForce = 32f;
+    public const float WallJumpForce = 26f;
     public const float BufferTime = 0.15f;
     public const int ChargeMultiplier = 15;
-    public const float JumpAngle = 0.75f; //lower value for bigger angle, higher value for smaller angle
+    public const float JumpAngle = 0.6f; //lower value for bigger angle, higher value for smaller angle
     public const float AirLandingGrace = 0.1f;
 
     // ---------- Wall climb ----------
@@ -44,5 +44,6 @@ public static class CharacterConstants
     public const float WallAttachSpeed = 15f;
     public const float WallAttachArriveDistance = 0.1f;
     public const float WallAttachTimeout = 0.5f;          // safety exit if something blocks the path
-    public const float WallAttachGroundLift = 1f; 
+    public const float WallAttachGroundLift = 1f;
+    public const float WallAttachBufferTime = 0.2f;
 }

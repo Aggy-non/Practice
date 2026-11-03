@@ -23,7 +23,7 @@ public class WallAttachState : IState
         target = player.GetWallAttachPosition();   // computed once, wallHit changes every frame
         facing = -player.WallNormal;
         timer = CharacterConstants.WallAttachTimeout;
-        Debug.Log("Wall Attach State");
+        //Debug.Log("Wall Attach State");
     }
 
     public void Execute()

@@ -10,9 +10,11 @@ public class CharacterStateMachine
     //states
     public IdleState idleState;
     public FloorMoveState floorMoveState;
-    public StartJumpState startJumpState;
+    public StartJumpStateFloor startJumpStateFloor;
+    public StartJumpStateWall startJumpStateWall;
     public DefaultAirState airState;
-    public ChargeState chargeState;
+    public ChargeStateFloor chargeStateFloor;
+    public ChargeStateWall chargeStateWall;
     public WallState wallState;
     public WallAttachState wallAttachState;
     public WallMoveState wallMoveState;
@@ -24,9 +26,11 @@ public class CharacterStateMachine
     {
         this.idleState = new IdleState(player,input);
         this.floorMoveState = new FloorMoveState(player,input);
-        this.startJumpState = new StartJumpState(player);
+        this.startJumpStateFloor = new StartJumpStateFloor(player);
+        this.startJumpStateWall = new StartJumpStateWall(player);
         this.airState = new DefaultAirState(player);
-        this.chargeState = new ChargeState(player);
+        this.chargeStateFloor = new ChargeStateFloor(player);
+        this.chargeStateWall = new ChargeStateWall(player);
         this.wallState = new WallState(player);
         this.wallAttachState = new WallAttachState(player);
         this.wallMoveState = new WallMoveState(player);

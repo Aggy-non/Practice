@@ -19,7 +19,7 @@ public class IdleState : IState
         player.SetSurfaceType(StateCharacterControl.Surface.Ground);
         player.SetMoveSpeedMultiplier(CharacterConstants.DefaultMoveSpeedMultiplier);
         CameraManager.Instance.MainCameraActive();
-        Debug.Log("IdleState");
+        //Debug.Log("IdleState");
     }
     public void Execute()
     {
