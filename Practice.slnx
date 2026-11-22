@@ -1,3 +1,6 @@
 ﻿<Solution>
   <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="SplineMesh.Colliders.csproj" />
+  <Project Path="SplineMesh.Editor.csproj" />
+  <Project Path="SplineMesh.Runtime.csproj" />
 </Solution>

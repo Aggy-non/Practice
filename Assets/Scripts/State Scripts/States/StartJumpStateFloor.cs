@@ -15,7 +15,7 @@ public class StartJumpStateFloor : IState
         player.SetDrag(CharacterConstants.AirDrag);
         player.Rb.linearVelocity = Vector3.zero; // will make movement close to 0
         CameraManager.Instance.MainCameraActive();
-        Debug.Log("Start Jump State");
+        //Debug.Log("Start Jump State");
     }
     public void Execute()
     {

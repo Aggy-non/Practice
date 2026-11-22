@@ -34,7 +34,7 @@ public class CharacterStateMachine
         this.wallState = new WallState(player);
         this.wallAttachState = new WallAttachState(player);
         this.wallMoveState = new WallMoveState(player);
-        Debug.Log("state machine online");
+        //Debug.Log("state machine online");
     }
     public void Initialize(IState state)
     {
