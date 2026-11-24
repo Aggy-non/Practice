@@ -10,12 +10,12 @@ public class StartJumpStateFloor : IState
     }
     public void Enter()
     {
-        player.SetGravity(CharacterConstants.AirGravityScale);
+        //player.SetGravity(CharacterConstants.AirGravityScale);
         player.SetMoveSpeedMultiplier(CharacterConstants.StartJumpMultiplier); // will make movement input 0
-        player.SetDrag(CharacterConstants.AirDrag);
+        player.SetDrag(CharacterConstants.StartJumpDrag);
         player.Rb.linearVelocity = Vector3.zero; // will make movement close to 0
         CameraManager.Instance.MainCameraActive();
-        //Debug.Log("Start Jump State");
+        Debug.Log("Start Jump State");
     }
     public void Execute()
     {
