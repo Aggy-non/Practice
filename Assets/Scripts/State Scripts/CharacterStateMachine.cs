@@ -1,5 +1,7 @@
 using System;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 [Serializable]
@@ -21,8 +23,10 @@ public class CharacterStateMachine
 
     public event Action<IState> OnStateChanged;
 
+    private Text CurrentStateDisplay;
 
-    public CharacterStateMachine(StateCharacterControl player,InputManager input)
+
+    public CharacterStateMachine(StateCharacterControl player,InputManager input,Text stateDisplay)
     {
         this.idleState = new IdleState(player,input);
         this.floorMoveState = new FloorMoveState(player,input);
@@ -34,6 +38,7 @@ public class CharacterStateMachine
         this.wallState = new WallState(player);
         this.wallAttachState = new WallAttachState(player);
         this.wallMoveState = new WallMoveState(player);
+        CurrentStateDisplay = stateDisplay;
         //Debug.Log("state machine online");
     }
     public void Initialize(IState state)
@@ -63,6 +68,7 @@ public class CharacterStateMachine
         CurrentState = newState;
         newState.Enter();
         
+        CurrentStateDisplay.text = CurrentState.ToString();
         OnStateChanged?.Invoke(newState);
     }
 }

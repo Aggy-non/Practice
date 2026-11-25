@@ -3,6 +3,8 @@ using Unity.Cinemachine;
 using Unity.VisualScripting;
 using UnityEngine;
 using System;
+using TMPro;
+using UnityEngine.UI;
 
 public class StateCharacterControl : MonoBehaviour
 {
@@ -32,6 +34,7 @@ public class StateCharacterControl : MonoBehaviour
 
     [Header("Jump settings")]
     private float jumpBufferTimer;
+    private bool jumpHeldInAir;
 
     [Header("Camera Settings")]
     [SerializeField] private Transform cameraPosition;
@@ -73,13 +76,16 @@ public class StateCharacterControl : MonoBehaviour
     public CharacterStateMachine StateMachine => stateMachine;
     public IState currentState;
 
+    [Header("Debug")]
+    [SerializeField] Text currentStateDisplay;
+
 
     #endregion
     private void Awake()
     {
         GetAllComponents();
         
-        stateMachine = new CharacterStateMachine(this,inputManager);
+        stateMachine = new CharacterStateMachine(this,inputManager,currentStateDisplay);
     }
 
     private void Start()
@@ -93,12 +99,25 @@ public class StateCharacterControl : MonoBehaviour
     private void Update()
     {
         GroundCheck();
+        GroundTouchedWhileJumpHled();
         CalculateCurrentMoveDir();
         WallCheck();
         stateMachine.Exectue();
         UpdateJumpBuffer();
         UpdateWallAttachBuffer();
         //printTheValues();
+    }
+
+    private void GroundTouchedWhileJumpHled()
+    {
+        if(jumpHeldInAir)
+        {
+            if(isGrounded)
+            {
+                stateMachine.TransitionToState(stateMachine.startJumpStateFloor);
+                jumpHeldInAir = false;
+            }
+        }
     }
 
     private void printTheValues()
@@ -263,6 +282,7 @@ public class StateCharacterControl : MonoBehaviour
     //noted under normal jump
     private void PerformNormalJump()
     {
+        jumpHeldInAir = false;
         if (currentSurface == Surface.Wall)
         {
             //print("wall jump");
@@ -406,7 +426,7 @@ public class StateCharacterControl : MonoBehaviour
         }
         else
         {
-            return;
+            jumpHeldInAir = true;            
         }
     }
 
